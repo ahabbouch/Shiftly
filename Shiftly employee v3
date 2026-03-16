@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shiftly — Employé</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Noto+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f5f4f1;--card:#fff;--border:rgba(0,0,0,0.07);
+  --text:#1a1a1c;--muted:#8a8a95;
+  --accent:#6c6fff;--accent-light:rgba(108,111,255,0.10);
+  --green:#16a34a;--green-light:rgba(22,163,74,0.10);
+  --orange:#ea580c;--orange-light:rgba(234,88,12,0.10);
+  --red:#dc2626;--red-light:rgba(220,38,38,0.10);
+  --radius:16px;--radius-sm:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{
+  font-family:'DM Sans','Noto Sans Arabic',sans-serif;
+  background:#1e1e23;
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;padding:20px;
+}
+
+/* PHONE SHELL */
+.phone{
+  width:375px;background:var(--bg);
+  border-radius:44px;overflow:hidden;
+  box-shadow:0 40px 80px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.06);
+  display:flex;flex-direction:column;min-height:820px;
+  position:relative;
+}
+.notch{background:#1a1a1c;height:44px;display:flex;align-items:center;justify-content:center;border-radius:44px 44px 0 0;flex-shrink:0;}
+.notch-pill{width:120px;height:34px;background:#000;border-radius:20px;}
+.phone-body{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+
+/* ─── TOP BAR (inside phone) ─── */
+.phone-topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 16px 6px;
+  background:var(--bg);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;position:relative;z-index:50;
+}
+.phone-topbar-left{font-size:15px;font-weight:600;letter-spacing:-.3px;}
+.phone-topbar-left span{color:var(--accent);}
+.status-icons{font-size:11px;color:var(--text);opacity:.55;letter-spacing:1px;}
+
+/* LANG BUTTON inside phone */
+.lang-pill{
+  display:flex;align-items:center;gap:5px;
+  padding:5px 10px;border-radius:20px;
+  border:1px solid var(--border);background:var(--card);
+  font-size:12px;font-weight:500;color:var(--muted);
+  cursor:pointer;transition:all .15s;position:relative;
+}
+.lang-pill:hover{border-color:var(--accent);color:var(--accent);}
+.lang-flag-sm{font-size:14px;}
+
+/* LANG DROPDOWN inside phone */
+.lang-dropdown{
+  position:absolute;top:calc(100% + 6px);right:0;
+  background:#fff;border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;z-index:200;
+  min-width:155px;display:none;
+  box-shadow:0 8px 24px rgba(0,0,0,0.12);
+}
+[dir="rtl"] .lang-dropdown{right:auto;left:0;}
+.lang-dropdown.open{display:block;}
+.lang-opt{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 13px;font-size:13px;font-weight:500;
+  color:var(--muted);cursor:pointer;transition:background .12s;
+  border-bottom:1px solid var(--border);
+}
+.lang-opt:last-child{border-bottom:none;}
+.lang-opt:hover{background:#f5f4f1;color:var(--text);}
+.lang-opt.active{color:var(--accent);background:var(--accent-light);}
+.lang-chk{margin-left:auto;color:var(--accent);font-size:12px;}
+[dir="rtl"] .lang-chk{margin-left:0;margin-right:auto;}
+
+/* SCREENS */
+.screen{display:none;flex-direction:column;flex:1;overflow-y:auto;}
+.screen.active{display:flex;}
+.screen::-webkit-scrollbar{display:none;}
+
+/* STATUS ROW (time + signal) */
+.status-bar{padding:10px 20px 4px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.status-time{font-size:15px;font-weight:600;}
+
+/* HOME */
+.home-header{padding:6px 20px 12px;flex-shrink:0;}
+.greeting{font-size:13px;color:var(--muted);}
+.greeting-name{font-size:22px;font-weight:600;letter-spacing:-.5px;margin-top:2px;}
+
+/* NEXT SHIFT CARD */
+.next-shift-card{
+  margin:0 16px 12px;background:var(--accent);
+  border-radius:var(--radius);padding:18px 20px;
+  color:#fff;flex-shrink:0;cursor:pointer;
+  transition:transform .15s;position:relative;overflow:hidden;
+}
+.next-shift-card:active{transform:scale(.98);}
+.nsc-label{font-size:11px;opacity:.75;font-weight:500;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;}
+.nsc-time{font-size:26px;font-weight:600;letter-spacing:-.5px;margin-bottom:2px;}
+.nsc-day{font-size:13px;opacity:.85;margin-bottom:12px;}
+.nsc-bottom{display:flex;align-items:center;justify-content:space-between;}
+.nsc-badge{background:rgba(255,255,255,.2);padding:4px 11px;border-radius:20px;font-size:12px;font-weight:500;}
+.nsc-deco{position:absolute;right:-20px;top:-20px;width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.07);}
+.nsc-deco2{position:absolute;right:18px;bottom:-28px;width:74px;height:74px;border-radius:50%;background:rgba(255,255,255,.05);}
+
+/* CLOCK IN CARD */
+.clockin-card{
+  margin:0 16px 12px;background:var(--card);
+  border-radius:var(--radius);padding:14px 16px;
+  border:1px solid var(--border);flex-shrink:0;
+}
+.cc-label{font-size:11px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+
+/* STORE ADDRESS ROW */
+.store-row{
+  display:flex;align-items:center;gap:8px;
+  padding:9px 12px;border-radius:var(--radius-sm);
+  background:#f5f4f1;border:1px solid var(--border);
+  margin-bottom:10px;cursor:pointer;
+}
+.store-icon{font-size:14px;flex-shrink:0;}
+.store-info{flex:1;min-width:0;}
+.store-name{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.store-addr{font-size:11px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.store-radius{font-size:11px;font-weight:500;color:var(--accent);background:var(--accent-light);padding:2px 7px;border-radius:20px;flex-shrink:0;}
+
+/* CLOCK STATUS */
+.cc-status{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.cc-dot{width:9px;height:9px;border-radius:50%;background:var(--muted);flex-shrink:0;}
+.cc-status-text{font-size:13px;font-weight:500;flex:1;}
+.cc-time{font-size:12px;color:var(--muted);}
+
+/* GEO ROW */
+.geo-row{
+  display:flex;align-items:center;gap:7px;
+  font-size:12px;padding:7px 10px;border-radius:8px;
+  margin-bottom:8px;transition:all .3s;
+}
+.geo-row.checking{background:rgba(0,0,0,.04);color:var(--muted);}
+.geo-row.in-range{background:var(--green-light);color:var(--green);}
+.geo-row.out-range{background:var(--red-light);color:var(--red);}
+.geo-row.denied{background:var(--orange-light);color:var(--orange);}
+.geo-icon{font-size:14px;flex-shrink:0;}
+.geo-text{flex:1;font-weight:500;}
+.geo-dist-badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;background:rgba(0,0,0,.06);color:inherit;}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.3}}
+.pulse{animation:pulse-dot 1.2s ease-in-out infinite;}
+
+/* MAP MINI */
+.map-wrap{
+  border-radius:10px;overflow:hidden;
+  border:1px solid var(--border);margin-bottom:8px;
+  height:100px;position:relative;
+  background:#dce8dc;display:none;
+}
+.map-wrap.show{display:block;}
+.map-label-bar{
+  position:absolute;bottom:0;left:0;right:0;
+  background:rgba(0,0,0,.45);padding:4px 10px;
+  font-size:10px;color:#fff;font-weight:500;
+}
+
+/* CLOCK BTN */
+.clock-btn{
+  width:100%;padding:12px;border-radius:var(--radius-sm);
+  background:var(--green);color:#fff;font-size:14px;font-weight:600;
+  border:none;cursor:pointer;font-family:inherit;
+  transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.clock-btn:active{transform:scale(.98);}
+.clock-btn:disabled{background:#ccc;cursor:not-allowed;}
+.clock-btn.clocked-in{background:var(--red);}
+
+/* SECTION */
+.section-hdr{padding:4px 20px 8px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.section-title{font-size:15px;font-weight:600;}
+.section-link{font-size:13px;color:var(--accent);font-weight:500;cursor:pointer;}
+
+/* WEEK LIST */
+.week-list{padding:0 16px;flex-shrink:0;}
+.shift-item{
+  background:var(--card);border-radius:var(--radius-sm);
+  padding:11px 13px;margin-bottom:7px;border:1px solid var(--border);
+  display:flex;align-items:center;gap:11px;cursor:pointer;transition:all .15s;
+}
+.shift-item.today{border-color:var(--accent);background:var(--accent-light);}
+.day-col{text-align:center;min-width:32px;}
+.day-name{font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase;}
+.day-num{font-size:18px;font-weight:600;letter-spacing:-.5px;}
+.day-num.tnow{color:var(--accent);}
+.vdivider{width:1px;height:32px;background:var(--border);flex-shrink:0;}
+.shift-info{flex:1;}
+.shift-time{font-size:13px;font-weight:500;}
+.shift-role-lbl{font-size:11px;color:var(--muted);margin-top:1px;}
+.pill{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;}
+.p-done{background:var(--green-light);color:var(--green);}
+.p-today{background:var(--orange-light);color:var(--orange);}
+.p-off{background:rgba(0,0,0,.05);color:var(--muted);}
+.p-pending{background:var(--orange-light);color:var(--orange);}
+.p-ok{background:var(--green-light);color:var(--green);}
+
+/* BOTTOM NAV */
+.bottom-nav{display:flex;background:var(--card);border-top:1px solid var(--border);padding:10px 0 20px;flex-shrink:0;}
+.nav-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 0;}
+.nav-tab-icon{font-size:20px;}
+.nav-tab-label{font-size:10px;font-weight:500;color:var(--muted);}
+.nav-tab.active .nav-tab-label{color:var(--accent);}
+
+/* DETAIL */
+.detail-hdr{padding:11px 18px;display:flex;align-items:center;gap:11px;flex-shrink:0;}
+.back-btn{width:32px;height:32px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;flex-shrink:0;}
+.detail-title{font-size:16px;font-weight:600;}
+.detail-hero{margin:0 16px 12px;background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:18px;flex-shrink:0;}
+.dh-day{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:2px;}
+.dh-time{font-size:28px;font-weight:600;letter-spacing:-1px;margin-bottom:2px;}
+.dh-dur{font-size:12px;color:var(--muted);margin-bottom:13px;}
+.dh-tags{display:flex;gap:7px;flex-wrap:wrap;}
+.dh-tag{font-size:12px;font-weight:500;padding:3px 10px;border-radius:20px;}
+.tag-role{background:var(--accent-light);color:var(--accent);}
+.tag-loc{background:rgba(0,0,0,.05);color:var(--muted);}
+.detail-actions{padding:0 16px 12px;display:flex;gap:8px;flex-shrink:0;}
+.act-btn{flex:1;padding:12px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:all .15s;}
+.act-btn:active{transform:scale(.98);}
+.a-confirm{background:var(--green);color:#fff;}
+.a-swap{background:var(--card);color:var(--text);border:1px solid var(--border);}
+.a-decline{background:var(--red-light);color:var(--red);}
+.info-row{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;margin:0 16px 7px;flex-shrink:0;}
+.ir-l{font-size:13px;color:var(--muted);}
+.ir-v{font-size:13px;font-weight:500;}
+
+/* SWAP */
+.swap-sub{padding:0 20px 12px;font-size:13px;color:var(--muted);flex-shrink:0;}
+.col-item{margin:0 16px 9px;background:var(--card);border-radius:var(--radius-sm);border:1px solid var(--border);padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:all .15s;flex-shrink:0;}
+.col-item.selected{border-color:var(--accent);background:var(--accent-light);}
+.col-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;}
+.col-name{font-size:13px;font-weight:500;}
+.col-avail{font-size:11px;color:var(--green);margin-top:2px;}
+.col-avail.busy{color:var(--muted);}
+.col-chk{margin-left:auto;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;}
+.col-chk.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+.send-btn{margin:5px 16px 12px;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;display:block;width:calc(100% - 32px);}
+.send-btn:disabled{opacity:.4;cursor:not-allowed;}
+
+/* PROFILE */
+.profile-hdr{padding:16px 20px 8px;text-align:center;flex-shrink:0;}
+.p-av{width:64px;height:64px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:600;color:#fff;margin:0 auto 9px;}
+.p-name{font-size:19px;font-weight:600;}
+.p-role{font-size:13px;color:var(--muted);margin-top:2px;}
+.stats-row{display:flex;padding:12px 16px;gap:8px;flex-shrink:0;}
+.stat-box{flex:1;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 7px;text-align:center;}
+.stat-val{font-size:19px;font-weight:600;}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:2px;}
+.pref-sec{padding:0 16px 8px;flex-shrink:0;}
+.pref-lbl{font-size:11px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px;padding-left:2px;}
+.pref-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;cursor:pointer;}
+.pref-item-lbl{font-size:13px;font-weight:500;}
+.pref-item-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.toggle{width:38px;height:22px;background:#ddd;border-radius:11px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
+.toggle.on{background:var(--accent);}
+.toggle-k{position:absolute;width:16px;height:16px;background:#fff;border-radius:50%;top:3px;left:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.toggle.on .toggle-k{left:19px;}
+
+/* RTL flips */
+[dir="rtl"] .cc-time{margin-left:0;margin-right:auto;}
+[dir="rtl"] .col-chk{margin-left:0;margin-right:auto;}
+[dir="rtl"] .geo-dist-badge{margin-left:0;}
+[dir="rtl"] .nsc-bottom,[dir="rtl"] .section-hdr,[dir="rtl"] .shift-item,[dir="rtl"] .store-row{flex-direction:row-reverse;}
+[dir="rtl"] .detail-hdr,[dir="rtl"] .info-row,[dir="rtl"] .cc-status,[dir="rtl"] .geo-row{flex-direction:row-reverse;}
+[dir="rtl"] .lang-chk{margin-left:0;margin-right:auto;}
+
+/* TOAST */
+.toast{position:absolute;bottom:88px;left:50%;transform:translateX(-50%) translateY(10px);background:#1a1a1c;color:#fff;padding:10px 18px;border-radius:20px;font-size:12px;font-weight:500;white-space:nowrap;opacity:0;transition:all .3s;pointer-events:none;z-index:999;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── LEAVE SCREEN ── */
+.leave-balance-row{display:flex;gap:8px;padding:0 16px 12px;flex-shrink:0;}
+.balance-box{flex:1;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 10px;text-align:center;}
+.balance-num{font-size:22px;font-weight:600;letter-spacing:-.5px;}
+.balance-lbl{font-size:10px;color:var(--muted);margin-top:3px;font-weight:500;text-transform:uppercase;letter-spacing:.04em;}
+.leave-type-row{display:flex;gap:7px;padding:0 16px 12px;flex-shrink:0;overflow-x:auto;}
+.leave-type-row::-webkit-scrollbar{display:none;}
+.ltype-btn{padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .15s;font-family:inherit;}
+.ltype-btn.sel{border-color:var(--accent);background:var(--accent-light);color:var(--accent);}
+.leave-form-card{margin:0 16px 12px;background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:14px 16px;flex-shrink:0;}
+.lf-label{font-size:11px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+.lf-date-row{display:flex;gap:8px;margin-bottom:12px;}
+.lf-date-box{flex:1;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;background:var(--bg,#f5f4f1);cursor:pointer;transition:border-color .15s;}
+.lf-date-box:focus-within{border-color:var(--accent);}
+.lf-date-lbl{font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;}
+.lf-date-val{font-size:13px;font-weight:500;}
+.lf-date-input{width:100%;border:none;background:transparent;font-family:inherit;font-size:13px;font-weight:500;color:var(--text);outline:none;cursor:pointer;}
+.lf-note{width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;background:var(--bg,#f5f4f1);font-family:inherit;font-size:13px;color:var(--text);resize:none;outline:none;transition:border-color .15s;min-height:64px;}
+.lf-note:focus{border-color:var(--accent);}
+.duration-badge{display:inline-block;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;background:var(--accent-light);color:var(--accent);margin-bottom:12px;}
+.submit-leave-btn{width:100%;padding:13px;border-radius:var(--radius-sm);background:var(--accent);color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:all .15s;margin-top:4px;}
+.submit-leave-btn:active{transform:scale(.98);}
+.submit-leave-btn:disabled{opacity:.4;cursor:not-allowed;}
+.leave-history-item{background:var(--card);border-radius:var(--radius-sm);padding:12px 14px;margin:0 16px 8px;border:1px solid var(--border);flex-shrink:0;}
+.lhi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+.lhi-type{font-size:13px;font-weight:600;}
+.lhi-dates{font-size:12px;color:var(--muted);margin-bottom:4px;}
+.lhi-note{font-size:12px;color:var(--muted);font-style:italic;}
+.leave-pill{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;}
+.lp-pending{background:rgba(234,88,12,.1);color:var(--orange);}
+.lp-approved{background:var(--green-light);color:var(--green);}
+.lp-rejected{background:var(--red-light);color:var(--red);}
+[dir="rtl"] .lf-date-row,[dir="rtl"] .leave-balance-row,[dir="rtl"] .lhi-top{flex-direction:row-reverse;}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"><div class="notch-pill"></div></div>
+  <div class="phone-body">
+
+    <!-- ── TOP BAR (always visible, inside phone) ── -->
+    <div class="phone-topbar">
+      <div class="phone-topbar-left">shift<span>ly</span></div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="status-icons">▲ WiFi ■</div>
+        <!-- LANGUAGE PILL -->
+        <div class="lang-pill" onclick="toggleLangMenu(event)" id="lang-pill">
+          <span id="cur-flag" class="lang-flag-sm">🇫🇷</span>
+          <span id="cur-name" style="font-size:12px;">FR</span>
+          <span style="font-size:9px;opacity:.5;">▼</span>
+          <!-- DROPDOWN -->
+          <div class="lang-dropdown" id="lang-dd" onclick="event.stopPropagation()">
+            <div class="lang-opt active" onclick="setLang('fr')" id="opt-fr"><span>🇫🇷</span> Français <span class="lang-chk" id="chk-fr">✓</span></div>
+            <div class="lang-opt" onclick="setLang('en')" id="opt-en"><span>🇬🇧</span> English <span class="lang-chk" id="chk-en" style="display:none">✓</span></div>
+            <div class="lang-opt" onclick="setLang('ar')" id="opt-ar"><span>🇲🇦</span> العربية <span class="lang-chk" id="chk-ar" style="display:none">✓</span></div>
+            <div class="lang-opt" onclick="setLang('es')" id="opt-es"><span>🇪🇸</span> Español <span class="lang-chk" id="chk-es" style="display:none">✓</span></div>
+            <div class="lang-opt" onclick="setLang('pt')" id="opt-pt"><span>🇧🇷</span> Português <span class="lang-chk" id="chk-pt" style="display:none">✓</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ HOME SCREEN ══ -->
+    <div class="screen active" id="screen-home">
+      <div class="status-bar"><div class="status-time">9:41</div></div>
+      <div class="home-header">
+        <div class="greeting" data-i18n="goodMorning">Bonjour,</div>
+        <div class="greeting-name">Sophie 👋</div>
+      </div>
+
+      <div class="next-shift-card" onclick="goTo('detail')">
+        <div class="nsc-deco"></div><div class="nsc-deco2"></div>
+        <div class="nsc-label" data-i18n="nextShift">Prochain shift</div>
+        <div class="nsc-time">14:00 → 22:00</div>
+        <div class="nsc-day" data-i18n="todayDate">Aujourd'hui, Mar 16 mars</div>
+        <div class="nsc-bottom">
+          <span class="nsc-badge" data-i18n="shiftBadge">Caissière · 8h</span>
+          <span id="nsc-arrow">→</span>
+        </div>
+      </div>
+
+      <!-- CLOCK IN CARD -->
+      <div class="clockin-card">
+        <div class="cc-label" data-i18n="clockInLabel">Pointage</div>
+
+        <!-- STORE ADDRESS (reference point) -->
+        <div class="store-row" onclick="goTo('profile')">
+          <div class="store-icon">🏪</div>
+          <div class="store-info">
+            <div class="store-name" id="store-name-display">Boulangerie Coin</div>
+            <div class="store-addr" id="store-addr-display">12 Rue de la Roquette, Paris 75011</div>
+          </div>
+          <div class="store-radius" id="store-radius-display">200m</div>
+        </div>
+
+        <!-- CLOCK STATUS -->
+        <div class="cc-status">
+          <div class="cc-dot" id="clock-dot"></div>
+          <div class="cc-status-text" id="clock-status-text" data-i18n="notClockedIn">Pas encore pointé</div>
+          <div class="cc-time" id="clock-time"></div>
+        </div>
+
+        <!-- GEO STATUS -->
+        <div class="geo-row checking" id="geo-row">
+          <span class="geo-icon pulse" id="geo-icon">📡</span>
+          <span class="geo-text" id="geo-text" data-i18n="geoChecking">Localisation en cours...</span>
+          <span class="geo-dist-badge" id="geo-dist" style="display:none;"></span>
+        </div>
+
+        <!-- MINI MAP -->
+        <div class="map-wrap" id="map-wrap">
+          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="display:block;">
+            <rect width="100%" height="100%" fill="#dce8dc"/>
+            <line x1="0" y1="34" x2="375" y2="34" stroke="rgba(255,255,255,0.7)" stroke-width="7"/>
+            <line x1="0" y1="70" x2="375" y2="70" stroke="rgba(255,255,255,0.4)" stroke-width="3"/>
+            <line x1="90" y1="0" x2="90" y2="100" stroke="rgba(255,255,255,0.4)" stroke-width="3"/>
+            <line x1="220" y1="0" x2="220" y2="100" stroke="rgba(255,255,255,0.7)" stroke-width="7"/>
+            <line x1="320" y1="0" x2="320" y2="100" stroke="rgba(255,255,255,0.4)" stroke-width="3"/>
+            <rect x="100" y="40" width="110" height="24" rx="3" fill="rgba(180,200,170,0.9)"/>
+            <rect x="230" y="40" width="84" height="24" rx="3" fill="rgba(180,200,170,0.9)"/>
+            <rect x="100" y="5" width="110" height="24" rx="3" fill="rgba(180,200,170,0.7)"/>
+            <!-- 200m radius circle -->
+            <circle cx="188" cy="50" r="38" fill="rgba(108,111,255,0.1)" stroke="rgba(108,111,255,0.45)" stroke-width="1.5" stroke-dasharray="5 3"/>
+            <!-- Store pin -->
+            <circle cx="188" cy="50" r="7" fill="#6c6fff" stroke="#fff" stroke-width="2"/>
+            <!-- User pin (moved by JS) -->
+            <circle id="user-dot" cx="175" cy="40" r="5" fill="#16a34a" stroke="#fff" stroke-width="1.5"/>
+          </svg>
+          <div class="map-label-bar" id="map-label-bar">Boulangerie Coin · 12 Rue de la Roquette · rayon 200m</div>
+        </div>
+
+        <button class="clock-btn" id="clock-btn" disabled onclick="toggleClock()">
+          <span id="clock-btn-icon">📍</span>
+          <span id="clock-btn-label" data-i18n="clockBtnWaiting">Vérification...</span>
+        </button>
+      </div>
+
+      <div class="section-hdr">
+        <div class="section-title" data-i18n="thisWeek">Cette semaine</div>
+        <div class="section-link" onclick="goTo('schedule')" data-i18n="seeAll">Voir tout</div>
+      </div>
+      <div class="week-list" id="home-week"></div>
+      <div style="height:8px;flex-shrink:0;"></div>
+      <div style="flex:1;min-height:0;"></div>
+
+      <div class="bottom-nav">
+        <div class="nav-tab active" onclick="goTo('home')"><div class="nav-tab-icon">🏠</div><div class="nav-tab-label" data-i18n="navHome">Accueil</div></div>
+        <div class="nav-tab" onclick="goTo('schedule')"><div class="nav-tab-icon">📅</div><div class="nav-tab-label" data-i18n="navSchedule">Planning</div></div>
+        <div class="nav-tab" onclick="goTo('leave')"><div class="nav-tab-icon">🏖</div><div class="nav-tab-label" data-i18n="navLeave">Congés</div></div>
+        <div class="nav-tab" onclick="goTo('swap')"><div class="nav-tab-icon">🔄</div><div class="nav-tab-label" data-i18n="navSwap">Échange</div></div>
+        <div class="nav-tab" onclick="goTo('profile')"><div class="nav-tab-icon">👤</div><div class="nav-tab-label" data-i18n="navProfile">Profil</div></div>
+      </div>
+    </div>
+
+    <!-- ══ DETAIL SCREEN ══ -->
+    <div class="screen" id="screen-detail">
+      <div class="status-bar"><div class="status-time">9:41</div></div>
+      <div class="detail-hdr">
+        <div class="back-btn" onclick="goTo('home')">←</div>
+        <div class="detail-title" data-i18n="shiftDetails">Détails du shift</div>
+      </div>
+      <div class="detail-hero">
+        <div class="dh-day" data-i18n="shiftDate">Vendredi, 19 mars</div>
+        <div class="dh-time">14:00 – 22:00</div>
+        <div class="dh-dur" data-i18n="shiftDuration">8 heures · Après-midi</div>
+        <div class="dh-tags">
+          <span class="dh-tag tag-role" data-i18n="roleLabel">Caissière</span>
+          <span class="dh-tag tag-loc">📍 Boulangerie Coin</span>
+        </div>
+      </div>
+      <div class="detail-actions">
+        <button class="act-btn a-confirm" onclick="confirmShift()" data-i18n="btnConfirm">✓ Confirmer</button>
+        <button class="act-btn a-swap" onclick="goTo('swap')" data-i18n="btnSwap">⇄ Échanger</button>
+        <button class="act-btn a-decline" onclick="declineShift()" data-i18n="btnDecline">✕ Refuser</button>
+      </div>
+      <div class="info-row"><span class="ir-l" data-i18n="infoManager">Responsable</span><span class="ir-v">Jean Dupont</span></div>
+      <div class="info-row"><span class="ir-l" data-i18n="infoBreak">Pause</span><span class="ir-v" data-i18n="infoBreakVal">30 min à 18:00</span></div>
+      <div class="info-row"><span class="ir-l" data-i18n="infoDress">Tenue</span><span class="ir-v" data-i18n="infoDressVal">Uniforme requis</span></div>
+      <div class="info-row"><span class="ir-l" data-i18n="infoLocation">Adresse</span><span class="ir-v" style="font-size:12px;">12 Rue de la Roquette</span></div>
+      <div style="flex:1;min-height:0;"></div>
+      <div class="bottom-nav">
+        <div class="nav-tab" onclick="goTo('home')"><div class="nav-tab-icon">🏠</div><div class="nav-tab-label" data-i18n="navHome">Accueil</div></div>
+        <div class="nav-tab active"><div class="nav-tab-icon">📅</div><div class="nav-tab-label" data-i18n="navSchedule">Planning</div></div>
+        <div class="nav-tab" onclick="goTo('leave')"><div class="nav-tab-icon">🏖</div><div class="nav-tab-label" data-i18n="navLeave">Congés</div></div>
+        <div class="nav-tab" onclick="goTo('swap')"><div class="nav-tab-icon">🔄</div><div class="nav-tab-label" data-i18n="navSwap">Échange</div></div>
+        <div class="nav-tab" onclick="goTo('profile')"><div class="nav-tab-icon">👤</div><div class="nav-tab-label" data-i18n="navProfile">Profil</div></div>
+      </div>
+    </div>
+
+    <!-- ══ SCHEDULE SCREEN ══ -->
+    <div class="screen" id="screen-schedule">
+      <div class="status-bar"><div class="status-time">9:41</div></div>
+      <div class="home-header"><div class="greeting-name" data-i18n="mySchedule">Mon planning</div></div>
+      <div class="week-list" id="full-week"></div>
+      <div style="flex:1;min-height:0;"></div>
+      <div class="bottom-nav">
+        <div class="nav-tab" onclick="goTo('home')"><div class="nav-tab-icon">🏠</div><div class="nav-tab-label" data-i18n="navHome">Accueil</div></div>
+        <div class="nav-tab active"><div class="nav-tab-icon">📅</div><div class="nav-tab-label" data-i18n="navSchedule">Planning</div></div>
+        <div class="nav-tab" onclick="goTo('leave')"><div class="nav-tab-icon">🏖</div><div class="nav-tab-label" data-i18n="navLeave">Congés</div></div>
+        <div class="nav-tab" onclick="goTo('swap')"><div class="nav-tab-icon">🔄</div><div class="nav-tab-label" data-i18n="navSwap">Échange</div></div>
+        <div class="nav-tab" onclick="goTo('profile')"><div class="nav-tab-icon">👤</div><div class="nav-tab-label" data-i18n="navProfile">Profil</div></div>
+      </div>
+    </div>
+
+    <!-- ══ SWAP SCREEN ══ -->
+    <div class="screen" id="screen-swap">
+      <div class="status-bar"><div class="status-time">9:41</div></div>
+      <div class="detail-hdr">
+        <div class="back-btn" onclick="goTo('home')">←</div>
+        <div class="detail-title" data-i18n="swapTitle">Demander un échange</div>
+      </div>
+      <div class="swap-sub" data-i18n="swapSub">Choisissez qui couvre votre shift vendredi 19 (14:00–22:00)</div>
+      <div class="col-item" id="col-1" onclick="selectCol(1)">
+        <div class="col-av" style="background:#4ade8022;color:#16a34a;">KB</div>
+        <div><div class="col-name">Karim B.</div><div class="col-avail" data-i18n="available">Disponible vendredi</div></div>
+        <div class="col-chk" id="chk-col-1"></div>
+      </div>
+      <div class="col-item" id="col-2" onclick="selectCol(2)">
+        <div class="col-av" style="background:#6c6fff22;color:#6c6fff;">MR</div>
+        <div><div class="col-name">Marc R.</div><div class="col-avail" data-i18n="available">Disponible vendredi</div></div>
+        <div class="col-chk" id="chk-col-2"></div>
+      </div>
+      <div class="col-item" style="opacity:.5;pointer-events:none;">
+        <div class="col-av" style="background:#fb923c22;color:#ea580c;">LT</div>
+        <div><div class="col-name">Leila T.</div><div class="col-avail busy" data-i18n="busy">Déjà en shift vendredi</div></div>
+        <div class="col-chk"></div>
+      </div>
+      <button class="send-btn" id="send-btn" disabled onclick="sendSwap()" data-i18n="sendSwap">Envoyer la demande</button>
+      <div style="padding:0 16px;font-size:12px;color:var(--muted);text-align:center;line-height:1.5;" data-i18n="swapNote">Votre responsable sera notifié automatiquement.</div>
+      <div style="flex:1;min-height:0;"></div>
+      <div class="bottom-nav">
+        <div class="nav-tab" onclick="goTo('home')"><div class="nav-tab-icon">🏠</div><div class="nav-tab-label" data-i18n="navHome">Accueil</div></div>
+        <div class="nav-tab" onclick="goTo('schedule')"><div class="nav-tab-icon">📅</div><div class="nav-tab-label" data-i18n="navSchedule">Planning</div></div>
+        <div class="nav-tab" onclick="goTo('leave')"><div class="nav-tab-icon">🏖</div><div class="nav-tab-label" data-i18n="navLeave">Congés</div></div>
+        <div class="nav-tab active"><div class="nav-tab-icon">🔄</div><div class="nav-tab-label" data-i18n="navSwap">Échange</div></div>
+        <div class="nav-tab" onclick="goTo('profile')"><div class="nav-tab-icon">👤</div><div class="nav-tab-label" data-i18n="navProfile">Profil</div></div>
+      </div>
+    </div>
+
+    <!-- ══ PROFILE SCREEN ══ -->
+    <div class="screen" id="screen-profile">
+      <div class="status-bar"><div class="status-time">9:41</div></div>
+      <div class="profile-hdr">
+        <div class="p-av">SL</div>
+        <div class="p-name">Sophie Laurent</div>
+        <div class="p-role" data-i18n="roleLabel">Caissière</div>
+        <div style="font-size:12px;color:var(--accent);font-weight:500;margin-top:5px;">Boulangerie Coin · Paris 11e</div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-val">32h</div><div class="stat-lbl" data-i18n="statWeek">Cette sem.</div></div>
+        <div class="stat-box"><div class="stat-val">128h</div><div class="stat-lbl" data-i18n="statMonth">Ce mois</div></div>
+        <div class="stat-box"><div class="stat-val">3</div><div class="stat-lbl" data-i18n="statSwaps">Échanges</div></div>
+      </div>
+
+      <!-- STORE ADDRESS CONFIG (editable reference) -->
+      <div class="pref-sec">
+        <div class="pref-lbl" data-i18n="storeConfigLabel">Ma boutique</div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:13px 14px;margin-bottom:7px;">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:5px;" data-i18n="storeNameLabel">Nom</div>
+          <div style="font-size:13px;font-weight:500;margin-bottom:10px;" id="profile-store-name">Boulangerie Coin</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:5px;" data-i18n="storeAddrLabel">Adresse (référence GPS)</div>
+          <div style="font-size:13px;font-weight:500;margin-bottom:10px;color:var(--accent);" id="profile-store-addr">12 Rue de la Roquette, Paris 75011</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div style="font-size:12px;color:var(--muted);" data-i18n="geoRadiusLabel">Rayon autorisé</div>
+              <div style="font-size:13px;font-weight:600;color:var(--accent);">200m</div>
+            </div>
+            <button style="font-size:12px;padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;font-family:inherit;" data-i18n="editBtn">Modifier</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="pref-sec">
+        <div class="pref-lbl" data-i18n="notifLabel">Notifications</div>
+        <div class="pref-item">
+          <div><div class="pref-item-lbl" data-i18n="shiftReminder">Rappel de shift</div><div class="pref-item-sub" data-i18n="reminderSub">24h avant</div></div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"><div class="toggle-k"></div></div>
+        </div>
+        <div class="pref-item">
+          <div><div class="pref-item-lbl" data-i18n="geoFeature">Pointage géolocalisé</div><div class="pref-item-sub" data-i18n="geoFeatureSub">Requis dans un rayon de 200m</div></div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"><div class="toggle-k"></div></div>
+        </div>
+        <div class="pref-item">
+          <div><div class="pref-item-lbl" data-i18n="swapRequests">Demandes d'échange</div></div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"><div class="toggle-k"></div></div>
+        </div>
+      </div>
+      <div style="flex:1;min-height:0;"></div>
+      <div class="bottom-nav">
+        <div class="nav-tab" onclick="goTo('home')"><div class="nav-tab-icon">🏠</div><div class="nav-tab-label" data-i18n="navHome">Accueil</div></div>
+        <div class="nav-tab" onclick="goTo('schedule')"><div class="nav-tab-icon">📅</div><div class="nav-tab-label" data-i18n="navSchedule">Planning</div></div>
+        <div class="nav-tab" onclick="goTo('leave')"><div class="nav-tab-icon">🏖</div><div class="nav-tab-label" data-i18n="navLeave">Congés</div></div>
+        <div class="nav-tab" onclick="goTo('swap')"><div class="nav-tab-icon">🔄</div><div class="nav-tab-label" data-i18n="navSwap">Échange</div></div>
+        <div class="nav-tab active"><div class="nav-tab-icon">👤</div><div class="nav-tab-label" data-i18n="navProfile">Profil</div></div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <!-- ══ LEAVE SCREEN ══ -->
+    <div class="screen" id="screen-leave">
+      <div class="status-bar"><div class="status-time">9:41</div></div>
+      <div class="home-header">
+        <div class="greeting-name" data-i18n="leaveTitle">Congés & Absences</div>
+      </div>
+
+      <!-- BALANCE BOXES -->
+      <div class="leave-balance-row">
+        <div class="balance-box">
+          <div class="balance-num" style="color:var(--accent);">18</div>
+          <div class="balance-lbl" data-i18n="balancePaid">CP restants</div>
+        </div>
+        <div class="balance-box">
+          <div class="balance-num" style="color:var(--green);">3</div>
+          <div class="balance-lbl" data-i18n="balanceRTT">RTT</div>
+        </div>
+        <div class="balance-box">
+          <div class="balance-num" style="color:var(--orange);">2</div>
+          <div class="balance-lbl" data-i18n="balanceSick">Maladie</div>
+        </div>
+      </div>
+
+      <!-- TYPE SELECTOR -->
+      <div class="leave-type-row" id="leave-type-row">
+        <button class="ltype-btn sel" onclick="selectLeaveType(this,'paid')" data-i18n="typePaid">Congé payé</button>
+        <button class="ltype-btn" onclick="selectLeaveType(this,'rtt')" data-i18n="typeRTT">RTT</button>
+        <button class="ltype-btn" onclick="selectLeaveType(this,'sick')" data-i18n="typeSick">Maladie</button>
+        <button class="ltype-btn" onclick="selectLeaveType(this,'unpaid')" data-i18n="typeUnpaid">Sans solde</button>
+        <button class="ltype-btn" onclick="selectLeaveType(this,'other')" data-i18n="typeOther">Autre</button>
+      </div>
+
+      <!-- REQUEST FORM -->
+      <div class="leave-form-card">
+        <div class="lf-label" data-i18n="lfDates">Dates</div>
+        <div class="lf-date-row">
+          <div class="lf-date-box">
+            <div class="lf-date-lbl" data-i18n="lfFrom">Du</div>
+            <input class="lf-date-input" type="date" id="leave-from" onchange="calcDuration()" min="2026-03-17">
+          </div>
+          <div class="lf-date-box">
+            <div class="lf-date-lbl" data-i18n="lfTo">Au</div>
+            <input class="lf-date-input" type="date" id="leave-to" onchange="calcDuration()" min="2026-03-17">
+          </div>
+        </div>
+        <div id="duration-badge" class="duration-badge" style="display:none;"></div>
+        <div class="lf-label" data-i18n="lfNote">Note (optionnel)</div>
+        <textarea class="lf-note" id="leave-note" rows="2" placeholder="ex. Rendez-vous médical, vacances en famille..."></textarea>
+        <button class="submit-leave-btn" id="submit-leave-btn" onclick="submitLeave()" disabled data-i18n="btnSubmitLeave">Envoyer la demande</button>
+      </div>
+
+      <!-- HISTORY -->
+      <div class="section-hdr" style="padding-top:4px;">
+        <div class="section-title" data-i18n="leaveHistory">Historique</div>
+      </div>
+
+      <div id="leave-history-list"></div>
+
+      <div style="height:10px;flex-shrink:0;"></div>
+      <div style="flex:1;min-height:0;"></div>
+      <div class="bottom-nav">
+        <div class="nav-tab" onclick="goTo('home')"><div class="nav-tab-icon">🏠</div><div class="nav-tab-label" data-i18n="navHome">Accueil</div></div>
+        <div class="nav-tab" onclick="goTo('schedule')"><div class="nav-tab-icon">📅</div><div class="nav-tab-label" data-i18n="navSchedule">Planning</div></div>
+        <div class="nav-tab active"><div class="nav-tab-icon">🏖</div><div class="nav-tab-label" data-i18n="navLeave">Congés</div></div>
+        <div class="nav-tab" onclick="goTo('swap')"><div class="nav-tab-icon">🔄</div><div class="nav-tab-label" data-i18n="navSwap">Échange</div></div>
+        <div class="nav-tab" onclick="goTo('profile')"><div class="nav-tab-icon">👤</div><div class="nav-tab-label" data-i18n="navProfile">Profil</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORE_LAT=48.8553, STORE_LNG=2.3700, RADIUS_M=200;
+const STORE_DATA={name:'Boulangerie Coin',addr:'12 Rue de la Roquette, Paris 75011',radius:'200m'};
+
+const T={
+  fr:{dir:'ltr',flag:'🇫🇷',code:'FR',
+    goodMorning:'Bonjour,',nextShift:'Prochain shift',todayDate:"Aujourd'hui, Mar 16 mars",shiftBadge:'Caissière · 8h',
+    clockInLabel:'Pointage',notClockedIn:'Pas encore pointé',clockedInSince:'Pointé depuis',clockOutBtn:'Pointer la sortie',
+    clockBtnWaiting:'Vérification...',clockBtnReady:'Pointer maintenant',clockBtnFar:'Trop loin du magasin',clockBtnDenied:'Localisation refusée',
+    geoChecking:'Localisation en cours...',geoInRange:'Dans le rayon — pointage autorisé',geoOutRange:'Hors rayon autorisé',geoDenied:"Accès refusé",
+    thisWeek:'Cette semaine',seeAll:'Voir tout',
+    navHome:'Accueil',navSchedule:'Planning',navSwap:'Échange',navProfile:'Profil',
+    shiftDetails:'Détails du shift',shiftDate:'Vendredi, 19 mars',shiftDuration:'8 heures · Après-midi',
+    roleLabel:'Caissière',infoManager:'Responsable',infoBreak:'Pause',infoBreakVal:'30 min à 18:00',infoDress:'Tenue',infoDressVal:'Uniforme requis',infoLocation:'Adresse',
+    btnConfirm:'✓ Confirmer',btnSwap:'⇄ Échanger',btnDecline:'✕ Refuser',mySchedule:'Mon planning',
+    swapTitle:'Demander un échange',swapSub:'Choisissez qui couvre votre shift vendredi 19 (14:00–22:00)',
+    available:'Disponible vendredi',busy:'Déjà en shift vendredi',
+    sendSwap:'Envoyer la demande',swapNote:'Votre responsable sera notifié automatiquement.',
+    statWeek:'Cette sem.',statMonth:'Ce mois',statSwaps:'Échanges',
+    storeConfigLabel:'Ma boutique',storeNameLabel:'Nom',storeAddrLabel:'Adresse (référence GPS)',geoRadiusLabel:'Rayon autorisé',editBtn:'Modifier',
+    notifLabel:'Notifications',shiftReminder:'Rappel de shift',reminderSub:'24h avant',
+    geoFeature:'Pointage géolocalisé',geoFeatureSub:'Requis dans un rayon de 200m',swapRequests:"Demandes d'échange",
+    toastIn:'✓ Pointage GPS enregistré',toastOut:'Sortie enregistrée',toastConfirm:'✓ Shift confirmé !',toastDecline:'Shift refusé.',toastSwap:'Demande envoyée !',
+    done:'✓ Fait',today:"Auj.",conf:'✓',off:'Congé',pend:'En attente',
+    days:[{n:'Lun',d:'15'},{n:'Mar',d:'16',t:true},{n:'Mer',d:'17'},{n:'Jeu',d:'18'},{n:'Ven',d:'19'},{n:'Sam',d:'20'},{n:'Dim',d:'21'}],
+    shifts:['6:00–14:00','14:00–22:00','6:00–14:00','Congé','14:00–22:00','8:00–16:00','Congé'],
+    sts:['done','today','conf','off','pend','conf','off'],
+    mapLabel:'Boulangerie Coin · 12 Rue de la Roquette · rayon 200m',distFrom:'du magasin',
+    navLeave:'Congés',
+    leaveTitle:'Congés & Absences',balancePaid:'CP restants',balanceRTT:'RTT',balanceSick:'Maladie',
+    typePaid:'Congé payé',typeRTT:'RTT',typeSick:'Maladie',typeUnpaid:'Sans solde',typeOther:'Autre',
+    lfDates:'Dates',lfFrom:'Du',lfTo:'Au',lfNote:'Note (optionnel)',
+    lfNotePlaceholder:'ex. Rendez-vous médical, vacances en famille...',
+    btnSubmitLeave:'Envoyer la demande',leaveHistory:'Historique',
+    durationDay:'jour',durationDays:'jours',
+    statusPending:'En attente',statusApproved:'Approuvé',statusRejected:'Refusé',
+    toastLeave:'✓ Demande envoyée au responsable',
+    leaveItems:[
+      {type:'Congé payé',from:'10 fév',to:'14 fév',days:5,note:'Vacances ski',status:'approved'},
+      {type:'RTT',from:'24 jan',to:'24 jan',days:1,note:'',status:'approved'},
+      {type:'Maladie',from:'8 jan',to:'9 jan',days:2,note:'Grippe',status:'approved'},
+      {type:'Congé payé',from:'23 déc',to:'2 jan',days:7,note:'Noël',status:'approved'},
+    ],
+  },
+  en:{dir:'ltr',flag:'🇬🇧',code:'EN',
+    goodMorning:'Good morning,',nextShift:'Next shift',todayDate:'Today, Tuesday Mar 16',shiftBadge:'Cashier · 8h',
+    clockInLabel:'Clock in',notClockedIn:'Not clocked in yet',clockedInSince:'Clocked in since',clockOutBtn:'Clock out',
+    clockBtnWaiting:'Checking location...',clockBtnReady:'Clock in now',clockBtnFar:'Too far from store',clockBtnDenied:'Location denied',
+    geoChecking:'Checking your location...',geoInRange:'In range — clock-in allowed',geoOutRange:'Out of allowed range',geoDenied:'Location access denied',
+    thisWeek:'This week',seeAll:'See all',
+    navHome:'Home',navSchedule:'Schedule',navSwap:'Swap',navProfile:'Profile',
+    shiftDetails:'Shift details',shiftDate:'Friday, March 19',shiftDuration:'8 hours · Afternoon',
+    roleLabel:'Cashier',infoManager:'Manager',infoBreak:'Break',infoBreakVal:'30 min at 18:00',infoDress:'Dress code',infoDressVal:'Uniform required',infoLocation:'Address',
+    btnConfirm:'✓ Confirm',btnSwap:'⇄ Swap',btnDecline:'✕ Decline',mySchedule:'My schedule',
+    swapTitle:'Request a swap',swapSub:'Choose who covers your Friday Mar 19 shift (14:00–22:00)',
+    available:'Available Friday',busy:'Already working Friday',
+    sendSwap:'Send swap request',swapNote:'Your manager will be notified automatically.',
+    statWeek:'This week',statMonth:'This month',statSwaps:'Swaps',
+    storeConfigLabel:'My store',storeNameLabel:'Name',storeAddrLabel:'Address (GPS reference)',geoRadiusLabel:'Allowed radius',editBtn:'Edit',
+    notifLabel:'Notifications',shiftReminder:'Shift reminders',reminderSub:'24h before each shift',
+    geoFeature:'Geo clock-in',geoFeatureSub:'Required within 200m of store',swapRequests:'Swap requests',
+    toastIn:'✓ GPS clock-in recorded',toastOut:'Clock-out recorded',toastConfirm:'✓ Shift confirmed!',toastDecline:'Shift declined.',toastSwap:'Swap request sent!',
+    done:'✓ Done',today:'Today',conf:'✓',off:'Day off',pend:'Pending',
+    days:[{n:'Mon',d:'15'},{n:'Tue',d:'16',t:true},{n:'Wed',d:'17'},{n:'Thu',d:'18'},{n:'Fri',d:'19'},{n:'Sat',d:'20'},{n:'Sun',d:'21'}],
+    shifts:['6:00–14:00','14:00–22:00','6:00–14:00','Day off','14:00–22:00','8:00–16:00','Day off'],
+    sts:['done','today','conf','off','pend','conf','off'],
+    mapLabel:'Boulangerie Coin · 12 Rue de la Roquette · 200m radius',distFrom:'from store',
+    navLeave:'Leave',
+    leaveTitle:'Leave & Absences',balancePaid:'Paid leave',balanceRTT:'RTT',balanceSick:'Sick days',
+    typePaid:'Paid leave',typeRTT:'RTT',typeSick:'Sick leave',typeUnpaid:'Unpaid',typeOther:'Other',
+    lfDates:'Dates',lfFrom:'From',lfTo:'To',lfNote:'Note (optional)',
+    lfNotePlaceholder:'e.g. Medical appointment, family holiday...',
+    btnSubmitLeave:'Send request',leaveHistory:'History',
+    durationDay:'day',durationDays:'days',
+    statusPending:'Pending',statusApproved:'Approved',statusRejected:'Rejected',
+    toastLeave:'✓ Request sent to manager',
+    leaveItems:[
+      {type:'Paid leave',from:'Feb 10',to:'Feb 14',days:5,note:'Ski holiday',status:'approved'},
+      {type:'RTT',from:'Jan 24',to:'Jan 24',days:1,note:'',status:'approved'},
+      {type:'Sick leave',from:'Jan 8',to:'Jan 9',days:2,note:'Flu',status:'approved'},
+      {type:'Paid leave',from:'Dec 23',to:'Jan 2',days:7,note:'Christmas',status:'approved'},
+    ],
+  },
+  ar:{dir:'rtl',flag:'🇲🇦',code:'AR',
+    goodMorning:'صباح الخير،',nextShift:'الوردية القادمة',todayDate:'اليوم، الثلاثاء ١٦ مارس',shiftBadge:'كاشير · ٨ ساعات',
+    clockInLabel:'تسجيل الحضور',notClockedIn:'لم تسجّل حضورك بعد',clockedInSince:'تم التسجيل منذ',clockOutBtn:'تسجيل الانصراف',
+    clockBtnWaiting:'جارٍ التحقق...',clockBtnReady:'سجّل حضورك الآن',clockBtnFar:'أنت بعيد عن المتجر',clockBtnDenied:'تم رفض الموقع',
+    geoChecking:'جارٍ تحديد موقعك...',geoInRange:'في النطاق — التسجيل مسموح',geoOutRange:'خارج النطاق المسموح',geoDenied:'تم رفض إذن الموقع',
+    thisWeek:'هذا الأسبوع',seeAll:'عرض الكل',
+    navHome:'الرئيسية',navSchedule:'الجدول',navSwap:'تبادل',navProfile:'الملف',
+    shiftDetails:'تفاصيل الوردية',shiftDate:'الجمعة، ١٩ مارس',shiftDuration:'٨ ساعات · مسائي',
+    roleLabel:'كاشير',infoManager:'المشرف',infoBreak:'استراحة',infoBreakVal:'٣٠ دقيقة الساعة ١٨:٠٠',infoDress:'الزي',infoDressVal:'الزي الرسمي مطلوب',infoLocation:'العنوان',
+    btnConfirm:'✓ تأكيد',btnSwap:'⇄ تبادل',btnDecline:'✕ رفض',mySchedule:'جدولي',
+    swapTitle:'طلب تبادل وردية',swapSub:'اختر من يغطي وردية الجمعة ١٩ (١٤:٠٠–٢٢:٠٠)',
+    available:'متاح الجمعة',busy:'يعمل الجمعة بالفعل',
+    sendSwap:'إرسال طلب التبادل',swapNote:'سيتم إخطار مشرفك تلقائياً.',
+    statWeek:'هذا الأسبوع',statMonth:'هذا الشهر',statSwaps:'التبادلات',
+    storeConfigLabel:'متجري',storeNameLabel:'الاسم',storeAddrLabel:'العنوان (مرجع GPS)',geoRadiusLabel:'النطاق المسموح',editBtn:'تعديل',
+    notifLabel:'الإشعارات',shiftReminder:'تذكير الوردية',reminderSub:'قبل ٢٤ ساعة',
+    geoFeature:'تسجيل بالموقع',geoFeatureSub:'مطلوب ضمن نطاق ٢٠٠م',swapRequests:'طلبات التبادل',
+    toastIn:'✓ تم تسجيل الحضور بـ GPS',toastOut:'تم تسجيل الانصراف',toastConfirm:'✓ تم تأكيد الوردية!',toastDecline:'تم رفض الوردية.',toastSwap:'تم إرسال طلب التبادل!',
+    done:'✓ منتهي',today:'اليوم',conf:'✓',off:'إجازة',pend:'في الانتظار',
+    days:[{n:'الإثنين',d:'١٥'},{n:'الثلاثاء',d:'١٦',t:true},{n:'الأربعاء',d:'١٧'},{n:'الخميس',d:'١٨'},{n:'الجمعة',d:'١٩'},{n:'السبت',d:'٢٠'},{n:'الأحد',d:'٢١'}],
+    shifts:['٦:٠٠–١٤:٠٠','١٤:٠٠–٢٢:٠٠','٦:٠٠–١٤:٠٠','إجازة','١٤:٠٠–٢٢:٠٠','٨:٠٠–١٦:٠٠','إجازة'],
+    sts:['done','today','conf','off','pend','conf','off'],
+    mapLabel:'بولانجيري كوان · ١٢ شارع دو لا روكيت · نطاق ٢٠٠م',distFrom:'من المتجر',
+    navLeave:'الإجازات',
+    leaveTitle:'الإجازات والغيابات',balancePaid:'إجازة مدفوعة',balanceRTT:'RTT',balanceSick:'مرض',
+    typePaid:'إجازة مدفوعة',typeRTT:'RTT',typeSick:'إجازة مرضية',typeUnpaid:'بدون أجر',typeOther:'أخرى',
+    lfDates:'التواريخ',lfFrom:'من',lfTo:'إلى',lfNote:'ملاحظة (اختياري)',
+    lfNotePlaceholder:'مثال: موعد طبي، عطلة عائلية...',
+    btnSubmitLeave:'إرسال الطلب',leaveHistory:'السجل',
+    durationDay:'يوم',durationDays:'أيام',
+    statusPending:'في الانتظار',statusApproved:'موافق عليه',statusRejected:'مرفوض',
+    toastLeave:'✓ تم إرسال الطلب للمشرف',
+    leaveItems:[
+      {type:'إجازة مدفوعة',from:'١٠ فبر',to:'١٤ فبر',days:5,note:'عطلة التزلج',status:'approved'},
+      {type:'RTT',from:'٢٤ يناير',to:'٢٤ يناير',days:1,note:'',status:'approved'},
+      {type:'إجازة مرضية',from:'٨ يناير',to:'٩ يناير',days:2,note:'إنفلونزا',status:'approved'},
+      {type:'إجازة مدفوعة',from:'٢٣ ديسمبر',to:'٢ يناير',days:7,note:'عطلة',status:'approved'},
+    ],
+  },
+  es:{dir:'ltr',flag:'🇪🇸',code:'ES',
+    goodMorning:'Buenos días,',nextShift:'Próximo turno',todayDate:'Hoy, martes 16 mar',shiftBadge:'Cajera · 8h',
+    clockInLabel:'Fichar',notClockedIn:'No fichado aún',clockedInSince:'Fichado desde',clockOutBtn:'Fichar salida',
+    clockBtnWaiting:'Verificando...',clockBtnReady:'Fichar ahora',clockBtnFar:'Demasiado lejos',clockBtnDenied:'Ubicación denegada',
+    geoChecking:'Verificando ubicación...',geoInRange:'En rango — fichaje permitido',geoOutRange:'Fuera del rango permitido',geoDenied:'Acceso a ubicación denegado',
+    thisWeek:'Esta semana',seeAll:'Ver todo',
+    navHome:'Inicio',navSchedule:'Turnos',navSwap:'Cambio',navProfile:'Perfil',
+    shiftDetails:'Detalles del turno',shiftDate:'Viernes, 19 marzo',shiftDuration:'8 horas · Tarde',
+    roleLabel:'Cajera',infoManager:'Responsable',infoBreak:'Descanso',infoBreakVal:'30 min a las 18:00',infoDress:'Uniforme',infoDressVal:'Uniforme requerido',infoLocation:'Dirección',
+    btnConfirm:'✓ Confirmar',btnSwap:'⇄ Cambiar',btnDecline:'✕ Rechazar',mySchedule:'Mi horario',
+    swapTitle:'Solicitar cambio',swapSub:'Elige quién cubre tu turno del viernes 19 (14:00–22:00)',
+    available:'Disponible el viernes',busy:'Ya trabaja el viernes',
+    sendSwap:'Enviar solicitud',swapNote:'Tu responsable será notificado automáticamente.',
+    statWeek:'Esta sem.',statMonth:'Este mes',statSwaps:'Cambios',
+    storeConfigLabel:'Mi tienda',storeNameLabel:'Nombre',storeAddrLabel:'Dirección (referencia GPS)',geoRadiusLabel:'Radio permitido',editBtn:'Editar',
+    notifLabel:'Notificaciones',shiftReminder:'Recordatorio de turno',reminderSub:'24h antes',
+    geoFeature:'Fichaje geolocalizado',geoFeatureSub:'Requerido en radio de 200m',swapRequests:'Solicitudes de cambio',
+    toastIn:'✓ Fichaje GPS registrado',toastOut:'Salida registrada',toastConfirm:'✓ Turno confirmado.',toastDecline:'Turno rechazado.',toastSwap:'Solicitud enviada.',
+    done:'✓ Hecho',today:'Hoy',conf:'✓',off:'Libre',pend:'Pendiente',
+    days:[{n:'Lun',d:'15'},{n:'Mar',d:'16',t:true},{n:'Mié',d:'17'},{n:'Jue',d:'18'},{n:'Vie',d:'19'},{n:'Sáb',d:'20'},{n:'Dom',d:'21'}],
+    shifts:['6:00–14:00','14:00–22:00','6:00–14:00','Libre','14:00–22:00','8:00–16:00','Libre'],
+    sts:['done','today','conf','off','pend','conf','off'],
+    mapLabel:'Boulangerie Coin · 12 Rue de la Roquette · radio 200m',distFrom:'de la tienda',
+    navLeave:'Ausencias',
+    leaveTitle:'Ausencias & Vacaciones',balancePaid:'Días libres',balanceRTT:'RTT',balanceSick:'Bajas',
+    typePaid:'Vacaciones',typeRTT:'RTT',typeSick:'Baja por enfermedad',typeUnpaid:'Sin sueldo',typeOther:'Otro',
+    lfDates:'Fechas',lfFrom:'Desde',lfTo:'Hasta',lfNote:'Nota (opcional)',
+    lfNotePlaceholder:'ej. Cita médica, vacaciones familiares...',
+    btnSubmitLeave:'Enviar solicitud',leaveHistory:'Historial',
+    durationDay:'día',durationDays:'días',
+    statusPending:'Pendiente',statusApproved:'Aprobado',statusRejected:'Rechazado',
+    toastLeave:'✓ Solicitud enviada al responsable',
+    leaveItems:[
+      {type:'Vacaciones',from:'10 feb',to:'14 feb',days:5,note:'Esquí',status:'approved'},
+      {type:'RTT',from:'24 ene',to:'24 ene',days:1,note:'',status:'approved'},
+      {type:'Baja',from:'8 ene',to:'9 ene',days:2,note:'Gripe',status:'approved'},
+      {type:'Vacaciones',from:'23 dic',to:'2 ene',days:7,note:'Navidad',status:'approved'},
+    ],
+  },
+  pt:{dir:'ltr',flag:'🇧🇷',code:'PT',
+    goodMorning:'Bom dia,',nextShift:'Próximo turno',todayDate:'Hoje, terça-feira 16 mar',shiftBadge:'Caixa · 8h',
+    clockInLabel:'Ponto',notClockedIn:'Ponto não registrado',clockedInSince:'Registrado desde',clockOutBtn:'Registrar saída',
+    clockBtnWaiting:'Verificando...',clockBtnReady:'Registrar entrada',clockBtnFar:'Longe demais da loja',clockBtnDenied:'Localização negada',
+    geoChecking:'Verificando localização...',geoInRange:'No raio — ponto liberado',geoOutRange:'Fora do raio permitido',geoDenied:'Acesso à localização negado',
+    thisWeek:'Esta semana',seeAll:'Ver tudo',
+    navHome:'Início',navSchedule:'Escala',navSwap:'Troca',navProfile:'Perfil',
+    shiftDetails:'Detalhes do turno',shiftDate:'Sexta-feira, 19 mar',shiftDuration:'8 horas · Tarde',
+    roleLabel:'Caixa',infoManager:'Responsável',infoBreak:'Intervalo',infoBreakVal:'30 min às 18:00',infoDress:'Uniforme',infoDressVal:'Uniforme obrigatório',infoLocation:'Endereço',
+    btnConfirm:'✓ Confirmar',btnSwap:'⇄ Trocar',btnDecline:'✕ Recusar',mySchedule:'Minha escala',
+    swapTitle:'Solicitar troca',swapSub:'Escolha quem cobre seu turno de sexta 19 (14:00–22:00)',
+    available:'Disponível na sexta',busy:'Já trabalha na sexta',
+    sendSwap:'Enviar solicitação',swapNote:'Seu responsável será notificado automaticamente.',
+    statWeek:'Esta sem.',statMonth:'Este mês',statSwaps:'Trocas',
+    storeConfigLabel:'Minha loja',storeNameLabel:'Nome',storeAddrLabel:'Endereço (referência GPS)',geoRadiusLabel:'Raio permitido',editBtn:'Editar',
+    notifLabel:'Notificações',shiftReminder:'Lembrete de turno',reminderSub:'24h antes',
+    geoFeature:'Ponto geolocalizado',geoFeatureSub:'Exigido em raio de 200m',swapRequests:'Solicitações de troca',
+    toastIn:'✓ Ponto GPS registrado',toastOut:'Saída registrada',toastConfirm:'✓ Turno confirmado!',toastDecline:'Turno recusado.',toastSwap:'Solicitação enviada!',
+    done:'✓ Feito',today:'Hoje',conf:'✓',off:'Folga',pend:'Pendente',
+    days:[{n:'Seg',d:'15'},{n:'Ter',d:'16',t:true},{n:'Qua',d:'17'},{n:'Qui',d:'18'},{n:'Sex',d:'19'},{n:'Sáb',d:'20'},{n:'Dom',d:'21'}],
+    shifts:['6:00–14:00','14:00–22:00','6:00–14:00','Folga','14:00–22:00','8:00–16:00','Folga'],
+    sts:['done','today','conf','off','pend','conf','off'],
+    mapLabel:'Boulangerie Coin · 12 Rue de la Roquette · raio 200m',distFrom:'da loja',
+    navLeave:'Férias',
+    leaveTitle:'Férias & Ausências',balancePaid:'Férias restantes',balanceRTT:'RTT',balanceSick:'Licença',
+    typePaid:'Férias',typeRTT:'RTT',typeSick:'Licença médica',typeUnpaid:'Sem remuneração',typeOther:'Outro',
+    lfDates:'Datas',lfFrom:'De',lfTo:'Até',lfNote:'Nota (opcional)',
+    lfNotePlaceholder:'ex. Consulta médica, férias em família...',
+    btnSubmitLeave:'Enviar solicitação',leaveHistory:'Histórico',
+    durationDay:'dia',durationDays:'dias',
+    statusPending:'Pendente',statusApproved:'Aprovado',statusRejected:'Recusado',
+    toastLeave:'✓ Solicitação enviada ao responsável',
+    leaveItems:[
+      {type:'Férias',from:'10 fev',to:'14 fev',days:5,note:'Esqui',status:'approved'},
+      {type:'RTT',from:'24 jan',to:'24 jan',days:1,note:'',status:'approved'},
+      {type:'Licença',from:'8 jan',to:'9 jan',days:2,note:'Gripe',status:'approved'},
+      {type:'Férias',from:'23 dez',to:'2 jan',days:7,note:'Natal',status:'approved'},
+    ],
+  }
+};
+
+let lang='fr', clockedIn=false, geoState='checking', simDist=null, selected=null;
+
+/* ── HELPERS ── */
+function haversine(a,b,c,d){
+  const R=6371000,dL=(c-a)*Math.PI/180,dO=(d-b)*Math.PI/180;
+  const x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dO/2)**2;
+  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+function goTo(s){
+  document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+  document.getElementById('screen-'+s).classList.add('active');
+  document.getElementById('screen-'+s).scrollTop=0;
+}
+
+/* ── GEO UI ── */
+function applyGeoUI(state,dist){
+  const t=T[lang];
+  const row=document.getElementById('geo-row');
+  const icon=document.getElementById('geo-icon');
+  const text=document.getElementById('geo-text');
+  const distBadge=document.getElementById('geo-dist');
+  const btn=document.getElementById('clock-btn');
+  const btnLbl=document.getElementById('clock-btn-label');
+  const mapWrap=document.getElementById('map-wrap');
+  const mapLbl=document.getElementById('map-label-bar');
+  row.className='geo-row '+state;
+  icon.className='geo-icon'+(state==='checking'?' pulse':'');
+  if(state==='checking'){icon.textContent='📡';text.textContent=t.geoChecking;distBadge.style.display='none';btn.disabled=true;btnLbl.textContent=t.clockBtnWaiting;mapWrap.classList.remove('show');}
+  else if(state==='in-range'){icon.textContent='✓';text.textContent=t.geoInRange;distBadge.style.display='inline';distBadge.textContent=Math.round(dist)+'m '+t.distFrom;mapWrap.classList.add('show');mapLbl.textContent=t.mapLabel;if(!clockedIn){btn.disabled=false;btnLbl.textContent=t.clockBtnReady;}placeUserDot(true);}
+  else if(state==='out-range'){icon.textContent='✕';text.textContent=t.geoOutRange;distBadge.style.display='inline';distBadge.textContent=Math.round(dist)+'m '+t.distFrom;btn.disabled=true;btnLbl.textContent=t.clockBtnFar;mapWrap.classList.add('show');mapLbl.textContent=t.mapLabel;placeUserDot(false);}
+  else{icon.textContent='✕';text.textContent=t.geoDenied;distBadge.style.display='none';btn.disabled=true;btnLbl.textContent=t.clockBtnDenied;mapWrap.classList.remove('show');}
+}
+
+function placeUserDot(inRange){
+  const dot=document.getElementById('user-dot');
+  const cx=188,cy=50;
+  if(inRange){const a=Math.random()*Math.PI*2,r=10+Math.random()*20;dot.setAttribute('cx',cx+r*Math.cos(a));dot.setAttribute('cy',cy+r*Math.sin(a));dot.setAttribute('fill','#16a34a');}
+  else{const a=Math.random()*Math.PI*2,r=50+Math.random()*15;dot.setAttribute('cx',cx+r*Math.cos(a));dot.setAttribute('cy',cy+r*Math.sin(a));dot.setAttribute('fill','#dc2626');}
+}
+
+function startGeo(){
+  applyGeoUI('checking',0);
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(pos=>{
+      const d=haversine(pos.coords.latitude,pos.coords.longitude,STORE_LAT,STORE_LNG);
+      simDist=d;geoState=d<=RADIUS_M?'in-range':'out-range';applyGeoUI(geoState,d);
+    },()=>simulate(),{enableHighAccuracy:true,timeout:6000});
+  } else simulate();
+}
+
+function simulate(){
+  setTimeout(()=>{simDist=310;geoState='out-range';applyGeoUI('out-range',310);
+    setTimeout(()=>{simDist=145;geoState='in-range';applyGeoUI('in-range',145);},2200);
+  },1500);
+}
+
+/* ── CLOCK ── */
+function toggleClock(){
+  const t=T[lang];
+  if(!clockedIn){
+    clockedIn=true;
+    const now=new Date(),h=now.getHours().toString().padStart(2,'0'),m=now.getMinutes().toString().padStart(2,'0');
+    document.getElementById('clock-dot').style.background='var(--green)';
+    document.getElementById('clock-status-text').textContent=t.clockedInSince;
+    document.getElementById('clock-time').textContent=h+':'+m;
+    document.getElementById('clock-btn').classList.add('clocked-in');
+    document.getElementById('clock-btn').disabled=false;
+    document.getElementById('clock-btn-label').textContent=t.clockOutBtn;
+    showToast(t.toastIn);
+  } else {
+    clockedIn=false;
+    document.getElementById('clock-dot').style.background='var(--muted)';
+    document.getElementById('clock-status-text').textContent=t.notClockedIn;
+    document.getElementById('clock-time').textContent='';
+    document.getElementById('clock-btn').classList.remove('clocked-in');
+    document.getElementById('clock-btn-label').textContent=geoState==='in-range'?t.clockBtnReady:t.clockBtnFar;
+    document.getElementById('clock-btn').disabled=geoState!=='in-range';
+    showToast(t.toastOut);
+  }
+}
+
+/* ── WEEK LIST ── */
+function buildWeek(id,t,max){
+  const c=document.getElementById(id);if(!c)return;
+  const days=max?t.days.slice(0,max):t.days;
+  const pm={done:'p-done',today:'p-today',conf:'p-ok',off:'p-off',pend:'p-pending'};
+  const pt={done:t.done,today:t.today,conf:t.conf,off:t.off,pend:t.pend};
+  c.innerHTML=days.map((d,i)=>`
+    <div class="shift-item${d.t?' today':''}" onclick="${d.t?"goTo('detail')":""}">
+      <div class="day-col"><div class="day-name">${d.n}</div><div class="day-num${d.t?' tnow':''}">${d.d}</div></div>
+      <div class="vdivider"></div>
+      <div class="shift-info"><div class="shift-time">${t.shifts[i]}</div><div class="shift-role-lbl">${t.roleLabel}</div></div>
+      <span class="pill ${pm[t.sts[i]]}">${pt[t.sts[i]]}</span>
+    </div>`).join('');
+}
+
+/* ── SWAP ── */
+function selectCol(id){
+  if(selected===id){selected=null;document.getElementById('col-'+id).classList.remove('selected');document.getElementById('chk-col-'+id).classList.remove('on');document.getElementById('chk-col-'+id).textContent='';document.getElementById('send-btn').disabled=true;return;}
+  [1,2].forEach(i=>{document.getElementById('col-'+i)?.classList.remove('selected');document.getElementById('chk-col-'+i).classList.remove('on');document.getElementById('chk-col-'+i).textContent='';});
+  selected=id;document.getElementById('col-'+id).classList.add('selected');document.getElementById('chk-col-'+id).classList.add('on');document.getElementById('chk-col-'+id).textContent='✓';document.getElementById('send-btn').disabled=false;
+}
+function sendSwap(){showToast(T[lang].toastSwap);selected=null;[1,2].forEach(i=>{document.getElementById('col-'+i)?.classList.remove('selected');document.getElementById('chk-col-'+i).classList.remove('on');document.getElementById('chk-col-'+i).textContent='';});document.getElementById('send-btn').disabled=true;setTimeout(()=>goTo('home'),1500);}
+function confirmShift(){showToast(T[lang].toastConfirm);setTimeout(()=>goTo('home'),1200);}
+function declineShift(){showToast(T[lang].toastDecline);setTimeout(()=>goTo('home'),1200);}
+
+/* ── LANG ── */
+function toggleLangMenu(e){e.stopPropagation();document.getElementById('lang-dd').classList.toggle('open');}
+document.addEventListener('click',()=>document.getElementById('lang-dd').classList.remove('open'));
+
+function setLang(l){
+  lang=l;const t=T[l];
+  document.documentElement.setAttribute('lang',l);
+  document.documentElement.setAttribute('dir',t.dir);
+  document.getElementById('cur-flag').textContent=t.flag;
+  document.getElementById('cur-name').textContent=t.code;
+  document.querySelectorAll('.lang-opt').forEach(o=>o.classList.remove('active'));
+  document.querySelectorAll('.lang-chk').forEach(c=>c.style.display='none');
+  document.getElementById('opt-'+l).classList.add('active');
+  document.getElementById('chk-'+l).style.display='inline';
+  document.getElementById('lang-dd').classList.remove('open');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(t[k]!==undefined)el.textContent=t[k];});
+  // store info (always same, language-independent display)
+  document.getElementById('store-name-display').textContent=STORE_DATA.name;
+  document.getElementById('store-addr-display').textContent=STORE_DATA.addr;
+  document.getElementById('store-radius-display').textContent=STORE_DATA.radius;
+  document.getElementById('profile-store-name').textContent=STORE_DATA.name;
+  document.getElementById('profile-store-addr').textContent=STORE_DATA.addr;
+  // re-apply geo text with new lang
+  applyGeoUI(geoState, simDist||145);
+  // clock state
+  if(clockedIn){document.getElementById('clock-status-text').textContent=t.clockedInSince;document.getElementById('clock-btn-label').textContent=t.clockOutBtn;}
+  // swap availability
+  document.querySelectorAll('.col-avail:not(.busy)').forEach(e=>e.textContent=t.available);
+  document.querySelectorAll('.col-avail.busy').forEach(e=>e.textContent=t.busy);
+  // update leave note placeholder
+  const noteEl = document.getElementById('leave-note');
+  if (noteEl && t.lfNotePlaceholder) noteEl.placeholder = t.lfNotePlaceholder;
+  // re-sync leave type buttons text
+  const ltRow = document.getElementById('leave-type-row');
+  if (ltRow) {
+    const types = ['paid','rtt','sick','unpaid','other'];
+    const keys = ['typePaid','typeRTT','typeSick','typeUnpaid','typeOther'];
+    ltRow.querySelectorAll('.ltype-btn').forEach((btn,i) => { btn.textContent = t[keys[i]]; if(types[i]===selectedLeaveType) btn.classList.add('sel'); else btn.classList.remove('sel'); });
+  }
+  buildWeek('home-week',t,5);
+  buildWeek('full-week',t,null);
+  renderLeaveHistory();
+}
+
+/* ── LEAVE ── */
+let selectedLeaveType = 'paid';
+
+function selectLeaveType(btn, type) {
+  selectedLeaveType = type;
+  document.querySelectorAll('.ltype-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+
+function calcDuration() {
+  const from = document.getElementById('leave-from').value;
+  const to = document.getElementById('leave-to').value;
+  const badge = document.getElementById('duration-badge');
+  const submitBtn = document.getElementById('submit-leave-btn');
+  const t = T[lang];
+  if (from && to) {
+    const d1 = new Date(from), d2 = new Date(to);
+    if (d2 >= d1) {
+      const diff = Math.round((d2 - d1) / 86400000) + 1;
+      badge.style.display = 'inline-block';
+      badge.textContent = diff + ' ' + (diff === 1 ? t.durationDay : t.durationDays);
+      submitBtn.disabled = false;
+      // Auto-set to min == from if to < from
+      if (d2 < d1) document.getElementById('leave-to').value = from;
+    } else {
+      badge.style.display = 'none';
+      submitBtn.disabled = true;
+    }
+  } else {
+    badge.style.display = 'none';
+    submitBtn.disabled = true;
+  }
+}
+
+function submitLeave() {
+  const t = T[lang];
+  const from = document.getElementById('leave-from').value;
+  const to = document.getElementById('leave-to').value;
+  const note = document.getElementById('leave-note').value;
+  if (!from || !to) return;
+  const diff = Math.round((new Date(to) - new Date(from)) / 86400000) + 1;
+  const typeMap = {paid: t.typePaid, rtt: t.typeRTT, sick: t.typeSick, unpaid: t.typeUnpaid, other: t.typeOther};
+  const fmt = d => { const p = d.split('-'); return p[2]+'/'+p[1]; };
+  // Add to history
+  const newItem = {type: typeMap[selectedLeaveType], from: fmt(from), to: fmt(to), days: diff, note: note, status: 'pending'};
+  T[lang].leaveItems.unshift(newItem);
+  // Reset form
+  document.getElementById('leave-from').value = '';
+  document.getElementById('leave-to').value = '';
+  document.getElementById('leave-note').value = '';
+  document.getElementById('duration-badge').style.display = 'none';
+  document.getElementById('submit-leave-btn').disabled = true;
+  renderLeaveHistory();
+  showToast(t.toastLeave);
+}
+
+function renderLeaveHistory() {
+  const t = T[lang];
+  const list = document.getElementById('leave-history-list');
+  if (!list) return;
+  const statusMap = {pending: t.statusPending, approved: t.statusApproved, rejected: t.statusRejected};
+  const statusClass = {pending: 'lp-pending', approved: 'lp-approved', rejected: 'lp-rejected'};
+  list.innerHTML = (t.leaveItems || []).map(item => `
+    <div class="leave-history-item">
+      <div class="lhi-top">
+        <div class="lhi-type">${item.type}</div>
+        <span class="leave-pill ${statusClass[item.status]}">${statusMap[item.status]}</span>
+      </div>
+      <div class="lhi-dates">${item.from} → ${item.to} · ${item.days} ${item.days === 1 ? t.durationDay : t.durationDays}</div>
+      ${item.note ? `<div class="lhi-note">${item.note}</div>` : ''}
+    </div>`).join('');
+}
+
+setLang('fr');
+startGeo();
+</script>
+</body>
+</html>
