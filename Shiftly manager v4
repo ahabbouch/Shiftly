@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shiftly — Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Noto+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f0f11;--bg2:#17171a;--bg3:#1e1e23;--bg4:#252529;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#f0f0f2;--muted:#7a7a85;--subtle:#4a4a55;
+  --accent:#6c6fff;--accent2:#4ade80;--accent3:#fb923c;
+  --danger:#f87171;--warning:#fbbf24;
+  --r:10px;--rl:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans','Noto Sans Arabic',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
+
+/* ── LANG BAR ── */
+.lang-bar{position:fixed;top:0;left:0;right:0;z-index:999;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;padding:5px 16px;height:36px;}
+[dir="rtl"] .lang-bar{justify-content:flex-start;}
+.lang-wrap{position:relative;}
+.lang-btn{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;border:1px solid var(--border2);background:var(--bg3);color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;}
+.lang-btn:hover{color:var(--text);}
+.lang-dd{position:absolute;top:calc(100%+6px);right:0;background:var(--bg3);border:1px solid var(--border2);border-radius:12px;overflow:hidden;z-index:600;min-width:155px;display:none;box-shadow:0 8px 24px rgba(0,0,0,.5);}
+[dir="rtl"] .lang-dd{right:auto;left:0;}
+.lang-dd.open{display:block;}
+.lang-opt{display:flex;align-items:center;gap:10px;padding:9px 13px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:background .12s;border-bottom:1px solid var(--border);}
+.lang-opt:last-child{border-bottom:none;}
+.lang-opt:hover{background:rgba(255,255,255,.05);color:var(--text);}
+.lang-opt.active{color:var(--text);background:rgba(108,111,255,.12);}
+.lchk{margin-left:auto;color:var(--accent);font-size:12px;}
+[dir="rtl"] .lchk{margin-left:0;margin-right:auto;}
+
+/* ── SIDEBAR ── */
+.sidebar{position:fixed;left:0;top:36px;bottom:0;width:230px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;}
+[dir="rtl"] .sidebar{left:auto;right:0;border-right:none;border-left:1px solid var(--border);}
+.sidebar-logo{padding:18px 18px 14px;font-size:18px;font-weight:600;letter-spacing:-.5px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.sidebar-logo span{color:var(--accent);}
+
+/* STORE SWITCHER */
+.store-switcher{margin:10px 10px 4px;flex-shrink:0;}
+.store-switcher-label{font-size:10px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:0 4px;margin-bottom:6px;}
+.store-btn{width:100%;display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r);background:var(--bg3);border:1px solid var(--border2);cursor:pointer;transition:all .15s;margin-bottom:4px;text-align:left;}
+.store-btn:hover{border-color:rgba(255,255,255,.2);}
+.store-btn.active{border-color:var(--accent);background:rgba(108,111,255,.08);}
+.store-dot{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;color:#fff;}
+.store-info-col{flex:1;min-width:0;}
+.store-btn-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.store-btn-addr{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+.store-active-dot{width:7px;height:7px;border-radius:50%;background:var(--accent2);flex-shrink:0;}
+.add-store-btn{width:100%;display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r);background:transparent;border:1px dashed var(--subtle);cursor:pointer;color:var(--muted);font-size:12px;font-weight:500;font-family:inherit;transition:all .15s;margin-bottom:2px;}
+.add-store-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* NAV */
+.nav{padding:6px 10px;flex:1;overflow-y:auto;}
+.nav-section{font-size:10px;font-weight:500;color:var(--subtle);text-transform:uppercase;letter-spacing:.06em;padding:8px 6px 4px;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;margin-bottom:1px;}
+.nav-item:hover{background:var(--bg3);color:var(--text);}
+.nav-item.active{background:rgba(108,111,255,.12);color:var(--accent);}
+.nav-icon{font-size:15px;width:18px;text-align:center;}
+.nav-badge{margin-left:auto;background:var(--danger);color:#fff;font-size:10px;padding:1px 5px;border-radius:20px;font-weight:600;}
+[dir="rtl"] .nav-badge{margin-left:0;margin-right:auto;}
+.sidebar-footer{padding:10px;border-top:1px solid var(--border);display:flex;align-items:center;gap:9px;flex-shrink:0;}
+.user-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#a78bfa);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;}
+
+/* ── MAIN ── */
+.main{margin-left:230px;margin-top:36px;min-height:100vh;}
+[dir="rtl"] .main{margin-left:0;margin-right:230px;}
+.topbar{padding:14px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg);position:sticky;top:36px;z-index:50;}
+.page-title{font-size:17px;font-weight:600;letter-spacing:-.3px;}
+.topbar-right{display:flex;gap:8px;align-items:center;}
+.btn{padding:7px 14px;border-radius:8px;font-size:13px;font-weight:500;border:1px solid var(--border2);background:var(--bg3);color:var(--text);cursor:pointer;transition:all .15s;font-family:inherit;}
+.btn:hover{border-color:rgba(255,255,255,.2);}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+.btn-primary:hover{background:#5a5df0;}
+.btn-sm{padding:5px 10px;font-size:12px;}
+.btn-danger{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.3);color:var(--danger);}
+.btn-danger:hover{background:rgba(248,113,113,.2);}
+.content{padding:20px 22px;}
+
+/* ── PANELS ── */
+.panel{display:none;}.panel.active{display:block;}
+
+/* ── METRICS ── */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.mc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:15px 17px;}
+.mc-label{font-size:11px;color:var(--muted);margin-bottom:5px;font-weight:500;text-transform:uppercase;letter-spacing:.04em;}
+.mc-val{font-size:24px;font-weight:600;letter-spacing:-.5px;margin-bottom:2px;}
+.mc-sub{font-size:12px;color:var(--muted);}
+.up{color:var(--accent2)!important;}.warn{color:var(--warning)!important;}.danger{color:var(--danger)!important;}
+
+/* ── SCHEDULE ── */
+.week-nav{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.week-lbl{font-size:14px;font-weight:600;}
+.wbtn{background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--muted);padding:5px 11px;cursor:pointer;font-family:inherit;font-size:13px;}
+.today-badge{font-size:11px;background:rgba(108,111,255,.15);color:var(--accent);padding:3px 10px;border-radius:20px;font-weight:500;border:1px solid rgba(108,111,255,.3);}
+.sched-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:16px;overflow-x:auto;}
+.sched-header{display:grid;grid-template-columns:148px repeat(7,1fr);border-bottom:1px solid var(--border);min-width:660px;}
+.sh-c{padding:9px 7px;text-align:center;font-size:12px;color:var(--muted);font-weight:500;border-right:1px solid var(--border);}
+.sh-c:last-child{border-right:none;}
+.sh-c.today{color:var(--accent);background:rgba(108,111,255,.06);}
+.sh-day{font-size:12px;font-weight:600;}.sh-date{font-size:11px;}
+.sched-row{display:grid;grid-template-columns:148px repeat(7,1fr);border-bottom:1px solid var(--border);min-width:660px;}
+.sched-row:last-child{border-bottom:none;}
+.emp-c{padding:9px 11px;border-right:1px solid var(--border);display:flex;align-items:center;gap:7px;}
+.eav{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;}
+.ename{font-size:12px;font-weight:500;}
+.erole{font-size:10px;color:var(--muted);}
+.shared-tag{font-size:9px;font-weight:600;padding:1px 5px;border-radius:20px;background:rgba(251,146,60,.15);color:var(--accent3);border:1px solid rgba(251,146,60,.25);margin-top:2px;display:inline-block;}
+.shift-c{padding:5px 4px;border-right:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.shift-c:last-child{border-right:none;}
+.shift-c.today{background:rgba(108,111,255,.04);}
+.sb{width:100%;padding:3px 5px;border-radius:5px;font-size:10px;font-weight:500;text-align:center;line-height:1.4;}
+.sm{background:rgba(74,222,128,.12);color:var(--accent2);border:1px solid rgba(74,222,128,.2);}
+.sa{background:rgba(108,111,255,.12);color:var(--accent);border:1px solid rgba(108,111,255,.2);}
+.sf{background:rgba(251,146,60,.12);color:var(--accent3);border:1px solid rgba(251,146,60,.2);}
+.se{width:100%;height:27px;border-radius:5px;border:1px dashed rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.1);font-size:14px;cursor:pointer;transition:all .15s;}
+.se:hover{border-color:var(--accent);color:var(--accent);background:rgba(108,111,255,.06);}
+
+/* ── CARDS ── */
+.two-col{display:grid;grid-template-columns:1fr 290px;gap:14px;}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+.card-hdr{padding:11px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-size:13px;font-weight:600;}
+.alert-row{padding:10px 15px;border-bottom:1px solid var(--border);display:flex;gap:9px;align-items:flex-start;}
+.alert-row:last-child{border-bottom:none;}
+.adot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.amsg{font-size:13px;flex:1;line-height:1.5;}
+.aact{font-size:11px;color:var(--accent);cursor:pointer;font-weight:500;margin-top:3px;}
+.qs{padding:10px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.qs:last-child{border-bottom:none;}
+.qs-l{font-size:13px;color:var(--muted);}
+.qs-v{font-size:13px;font-weight:600;}
+
+/* ── TEAM TABLE ── */
+.table-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+.data-table{width:100%;border-collapse:collapse;font-size:13px;}
+.data-table th{text-align:left;padding:9px 15px;font-size:11px;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.04em;}
+.data-table td{padding:11px 15px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table tr:hover td{background:rgba(255,255,255,.02);}
+.store-pill{font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;display:inline-flex;align-items:center;gap:4px;margin:2px 3px 2px 0;}
+.emp-cell-row{display:flex;align-items:center;gap:9px;}
+
+/* ── SETTINGS / STORES ── */
+.stores-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:18px;}
+.store-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;transition:border-color .2s;}
+.store-card:hover{border-color:var(--border2);}
+.store-card.active-store{border-color:var(--accent);}
+.sc-top{padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
+.sc-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;}
+.sc-name{font-size:14px;font-weight:600;}
+.sc-type{font-size:12px;color:var(--muted);margin-top:2px;}
+.sc-body{padding:12px 16px;}
+.sc-field{margin-bottom:10px;}
+.sc-field:last-child{margin-bottom:0;}
+.sc-field-label{font-size:11px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;}
+.sc-field-val{font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;}
+.sc-field-val.addr{color:var(--accent);font-size:12px;}
+.sc-actions{padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px;}
+.radius-badge{font-size:11px;padding:2px 8px;border-radius:20px;background:rgba(108,111,255,.12);color:var(--accent);border:1px solid rgba(108,111,255,.25);font-weight:500;}
+.add-store-card{background:var(--bg2);border:2px dashed var(--subtle);border-radius:var(--rl);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;cursor:pointer;transition:all .2s;min-height:200px;}
+.add-store-card:hover{border-color:var(--accent);background:rgba(108,111,255,.04);}
+.add-store-card-icon{font-size:28px;margin-bottom:10px;opacity:.5;}
+.add-store-card-text{font-size:13px;font-weight:500;color:var(--muted);}
+.add-store-card:hover .add-store-card-icon,.add-store-card:hover .add-store-card-text{opacity:1;color:var(--accent);}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:400;opacity:0;pointer-events:none;transition:opacity .2s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:0;width:460px;max-height:90vh;overflow-y:auto;transform:translateY(10px);transition:transform .2s;}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-hdr{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg2);z-index:1;}
+.modal-title{font-size:16px;font-weight:600;}
+.modal-close{width:28px;height:28px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--muted);}
+.modal-body{padding:18px 22px;}
+.form-group{margin-bottom:14px;}
+.form-label{font-size:12px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;}
+.form-input,.form-select,.form-textarea{width:100%;padding:9px 12px;border-radius:8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:inherit;font-size:13px;outline:none;transition:border-color .15s;}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent);}
+.form-select option,.form-textarea{background:var(--bg3);}
+.form-textarea{resize:vertical;min-height:60px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.form-hint{font-size:11px;color:var(--muted);margin-top:4px;}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;position:sticky;bottom:0;background:var(--bg2);}
+[dir="rtl"] .modal-footer{justify-content:flex-start;}
+
+/* COLOR PICKER */
+.color-row{display:flex;gap:8px;flex-wrap:wrap;}
+.color-swatch{width:28px;height:28px;border-radius:7px;cursor:pointer;border:2px solid transparent;transition:all .15s;}
+.color-swatch.selected,.color-swatch:hover{border-color:#fff;transform:scale(1.1);}
+
+/* GEO TABLE */
+.geo-table-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:16px;}
+.geo-table{width:100%;border-collapse:collapse;font-size:13px;}
+.geo-table th{text-align:left;padding:9px 15px;font-size:11px;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.04em;}
+.geo-table td{padding:11px 15px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.geo-table tr:last-child td{border-bottom:none;}
+.geo-table tr:hover td{background:rgba(255,255,255,.02);}
+.geo-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px;}
+.geo-ok{background:rgba(74,222,128,.1);color:var(--accent2);border:1px solid rgba(74,222,128,.2);}
+.geo-out{background:rgba(248,113,113,.1);color:var(--danger);border:1px solid rgba(248,113,113,.2);}
+.geo-pending{background:rgba(122,122,133,.1);color:var(--muted);border:1px solid var(--border);}
+.gdot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+.dist-pill{font-size:11px;color:var(--muted);background:var(--bg3);padding:2px 7px;border-radius:20px;border:1px solid var(--border);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.live{width:7px;height:7px;border-radius:50%;background:var(--accent2);display:inline-block;animation:blink 2s ease-in-out infinite;}
+
+/* RTL adjustments */
+[dir="rtl"] .emp-c,[dir="rtl"] .shift-c,[dir="rtl"] .sh-c{border-right:none;border-left:1px solid var(--border);}
+[dir="rtl"] .sh-c:last-child,[dir="rtl"] .shift-c:last-child{border-left:none;}
+[dir="rtl"] .geo-table th,[dir="rtl"] .geo-table td,[dir="rtl"] .data-table th,[dir="rtl"] .data-table td{text-align:right;}
+
+/* ── LEAVE PANEL ── */
+.leave-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+.leave-filter-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.lf-pill{padding:6px 13px;border-radius:20px;font-size:12px;font-weight:500;border:1px solid var(--border);background:var(--bg3);color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s;}
+.lf-pill:hover{color:var(--text);border-color:var(--border2);}
+.lf-pill.active{background:rgba(108,111,255,.12);border-color:var(--accent);color:var(--accent);}
+.leave-table-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:16px;}
+.leave-table{width:100%;border-collapse:collapse;font-size:13px;}
+.leave-table th{text-align:left;padding:9px 15px;font-size:11px;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.04em;}
+.leave-table td{padding:11px 15px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.leave-table tr:last-child td{border-bottom:none;}
+.leave-table tr:hover td{background:rgba(255,255,255,.02);}
+.leave-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px;}
+.lb-pending{background:rgba(251,191,36,.1);color:var(--warning);border:1px solid rgba(251,191,36,.25);}
+.lb-approved{background:rgba(74,222,128,.1);color:var(--accent2);border:1px solid rgba(74,222,128,.2);}
+.lb-rejected{background:rgba(248,113,113,.1);color:var(--danger);border:1px solid rgba(248,113,113,.2);}
+.leave-type-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.action-icon{width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);display:inline-flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;transition:all .15s;margin-right:4px;}
+.action-icon:hover{border-color:var(--border2);background:var(--bg4);}
+.action-icon.approve:hover{background:rgba(74,222,128,.1);border-color:rgba(74,222,128,.3);color:var(--accent2);}
+.action-icon.reject:hover{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.3);color:var(--danger);}
+.leave-summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.lsg-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px;}
+.lsg-emp{display:flex;align-items:center;gap:9px;margin-bottom:10px;}
+.lsg-name{font-size:13px;font-weight:500;}
+.lsg-role{font-size:11px;color:var(--muted);}
+.lsg-bars{display:flex;flex-direction:column;gap:5px;}
+.lsg-bar-row{display:flex;align-items:center;gap:8px;font-size:11px;}
+.lsg-bar-lbl{color:var(--muted);min-width:60px;}
+.lsg-bar-track{flex:1;height:4px;background:var(--bg3);border-radius:2px;}
+.lsg-bar-fill{height:100%;border-radius:2px;}
+.lsg-bar-val{color:var(--muted);min-width:24px;text-align:right;}
+[dir="rtl"] .leave-table th,[dir="rtl"] .leave-table td{text-align:right;}
+[dir="rtl"] .leave-filter-row{flex-direction:row-reverse;}
+</style>
+</head>
+<body>
+
+<!-- LANG BAR -->
+<div class="lang-bar">
+  <div class="lang-wrap">
+    <button class="lang-btn" onclick="toggleLang(event)" id="lang-btn">
+      <span id="cur-flag">🇫🇷</span><span id="cur-lname">Français</span><span style="font-size:10px;opacity:.5;">▼</span>
+    </button>
+    <div class="lang-dd" id="lang-dd">
+      <div class="lang-opt active" onclick="setLang('fr')" id="opt-fr">🇫🇷 Français <span class="lchk" id="lchk-fr">✓</span></div>
+      <div class="lang-opt" onclick="setLang('en')" id="opt-en">🇬🇧 English <span class="lchk" id="lchk-en" style="display:none">✓</span></div>
+      <div class="lang-opt" onclick="setLang('ar')" id="opt-ar">🇲🇦 العربية <span class="lchk" id="lchk-ar" style="display:none">✓</span></div>
+      <div class="lang-opt" onclick="setLang('es')" id="opt-es">🇪🇸 Español <span class="lchk" id="lchk-es" style="display:none">✓</span></div>
+      <div class="lang-opt" onclick="setLang('pt')" id="opt-pt">🇧🇷 Português <span class="lchk" id="lchk-pt" style="display:none">✓</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">shift<span>ly</span></div>
+
+  <div class="store-switcher">
+    <div class="store-switcher-label" data-i18n="myStores">Mes boutiques</div>
+    <div id="store-list"></div>
+    <button class="add-store-btn" onclick="openAddStore()">
+      <span>＋</span><span data-i18n="addStore">Ajouter une boutique</span>
+    </button>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-section" data-i18n="currentStore">Boutique active</div>
+    <div class="nav-item active" onclick="switchPanel('schedule',this)"><span class="nav-icon">📅</span><span data-i18n="navSchedule">Planning</span></div>
+    <div class="nav-item" onclick="switchPanel('geo',this)"><span class="nav-icon">📍</span><span data-i18n="navGeo">Pointages GPS</span><span class="nav-badge" id="geo-badge">2</span></div>
+    <div class="nav-item" onclick="switchPanel('team',this)"><span class="nav-icon">👥</span><span data-i18n="navTeam">Équipe</span></div>
+    <div class="nav-item" onclick="switchPanel('leave',this)"><span class="nav-icon">🏖</span><span data-i18n="navLeave">Congés</span><span class="nav-badge" id="leave-badge">2</span></div>
+    <div class="nav-item" onclick="switchPanel('alerts',this)"><span class="nav-icon">🔔</span><span data-i18n="navAlerts">Alertes</span><span class="nav-badge">3</span></div>
+    <div class="nav-section" data-i18n="account">Compte</div>
+    <div class="nav-item" onclick="switchPanel('stores',this)"><span class="nav-icon">🏪</span><span data-i18n="navStores">Mes boutiques</span></div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-av">JD</div>
+    <div>
+      <div style="font-size:13px;font-weight:500;">Jean Dupont</div>
+      <div style="font-size:11px;color:var(--muted);" data-i18n="roleOwner">Gérant</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title" id="page-title" data-i18n="navSchedule">Planning</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px;" id="active-store-label"></div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn" data-i18n="btnExport">Exporter PDF</button>
+      <button class="btn" data-i18n="btnNotify">Notifier l'équipe</button>
+      <button class="btn btn-primary" onclick="openAddShift()" data-i18n="btnAddShift">+ Ajouter un shift</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- SCHEDULE -->
+    <div class="panel active" id="panel-schedule">
+      <div class="metrics">
+        <div class="mc"><div class="mc-label" data-i18n="metricStaff">Effectif</div><div class="mc-val" id="m-staff">5</div><div class="mc-sub up" data-i18n="metricStaffSub">Confirmés</div></div>
+        <div class="mc"><div class="mc-label" data-i18n="metricHours">Heures</div><div class="mc-val">187h</div><div class="mc-sub" data-i18n="metricHoursSub">cette semaine</div></div>
+        <div class="mc"><div class="mc-label" data-i18n="metricGeoOk">GPS OK</div><div class="mc-val up" id="m-geo">4/5</div><div class="mc-sub up" data-i18n="metricGeoSub">aujourd'hui</div></div>
+        <div class="mc"><div class="mc-label" data-i18n="metricConflicts">Conflits</div><div class="mc-val danger">1</div><div class="mc-sub danger" data-i18n="metricConflictsSub">à résoudre</div></div>
+      </div>
+      <div class="week-nav">
+        <button class="wbtn">←</button>
+        <div class="week-lbl" data-i18n="weekLabel">15 mar – 21 mar 2026</div>
+        <button class="wbtn">→</button>
+        <span class="today-badge" data-i18n="thisWeek">Cette semaine</span>
+      </div>
+      <div class="sched-wrap">
+        <div class="sched-header">
+          <div class="sh-c" style="text-align:left;padding-left:11px;" data-i18n="colEmp">Employé</div>
+          <div class="sh-c"><div class="sh-day" data-i18n="dayMon">Lun</div><div class="sh-date">15</div></div>
+          <div class="sh-c today"><div class="sh-day" data-i18n="dayTue">Mar</div><div class="sh-date">16</div></div>
+          <div class="sh-c"><div class="sh-day" data-i18n="dayWed">Mer</div><div class="sh-date">17</div></div>
+          <div class="sh-c"><div class="sh-day" data-i18n="dayThu">Jeu</div><div class="sh-date">18</div></div>
+          <div class="sh-c"><div class="sh-day" data-i18n="dayFri">Ven</div><div class="sh-date">19</div></div>
+          <div class="sh-c"><div class="sh-day" data-i18n="daySat">Sam</div><div class="sh-date">20</div></div>
+          <div class="sh-c"><div class="sh-day" data-i18n="daySun">Dim</div><div class="sh-date">21</div></div>
+        </div>
+        <div id="sched-body"></div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-hdr"><div class="card-title" data-i18n="alertsTitle">Alertes</div><button class="btn btn-sm" data-i18n="viewAll">Voir tout</button></div>
+          <div class="alert-row"><div class="adot" style="background:var(--danger)"></div><div><div class="amsg" data-i18n="alert1"><strong>Sophie L.</strong> et <strong>Marc R.</strong> se chevauchent jeudi.</div><div class="aact" onclick="openAddShift()" data-i18n="resolveConflict">Résoudre →</div></div></div>
+          <div class="alert-row"><div class="adot" style="background:var(--warning)"></div><div><div class="amsg" data-i18n="alert2"><strong>Leila T.</strong> pas encore pointée — shift commencé il y a 25 min.</div><div class="aact" onclick="switchPanel('geo',document.querySelector('.nav-item:nth-child(2)'))" data-i18n="viewGps">Voir GPS →</div></div></div>
+          <div class="alert-row"><div class="adot" style="background:var(--accent2)"></div><div><div class="amsg" data-i18n="alert3"><strong>Karim B.</strong> pointé à 22m. ✓</div></div></div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><div class="card-title" data-i18n="weekSummary">Résumé</div></div>
+          <div class="qs"><span class="qs-l" data-i18n="labourCost">Coût MO</span><span class="qs-v">2 340 €</span></div>
+          <div class="qs"><span class="qs-l" data-i18n="geoCompliance">Conformité GPS</span><span class="qs-v" style="color:var(--accent2)">80%</span></div>
+          <div class="qs"><span class="qs-l" data-i18n="confirmed">Shifts confirmés</span><span class="qs-v" style="color:var(--accent2)">28/30</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GEO PANEL -->
+    <div class="panel" id="panel-geo">
+      <div class="metrics">
+        <div class="mc"><div class="mc-label" data-i18n="geoPresent">Présents GPS</div><div class="mc-val up">4</div><div class="mc-sub up" data-i18n="geoInRadius">dans le rayon</div></div>
+        <div class="mc"><div class="mc-label" data-i18n="geoLate">En retard</div><div class="mc-val warn">1</div><div class="mc-sub warn" data-i18n="geoNoSignal">pas de signal</div></div>
+        <div class="mc"><div class="mc-label" data-i18n="geoOutOfRange">Hors rayon</div><div class="mc-val danger">1</div><div class="mc-sub danger" data-i18n="geoAlertSent">alerte envoyée</div></div>
+        <div class="mc"><div class="mc-label" data-i18n="geoRadius">Rayon</div><div class="mc-val" id="geo-radius-display">200m</div><div class="mc-sub" id="geo-addr-short">Rue de la Roquette</div></div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="font-size:14px;font-weight:600;" data-i18n="geoTableTitle">Pointages du jour</div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--accent2);"><span class="live"></span><span data-i18n="liveUpdates">Temps réel</span></div>
+      </div>
+      <div class="geo-table-wrap">
+        <table class="geo-table">
+          <thead><tr>
+            <th data-i18n="colEmp">Employé</th>
+            <th data-i18n="colShift">Shift</th>
+            <th data-i18n="colClockIn">Pointage</th>
+            <th data-i18n="colDistance">Distance</th>
+            <th data-i18n="colStatus">Statut</th>
+          </tr></thead>
+          <tbody id="geo-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TEAM PANEL -->
+    <div class="panel" id="panel-team">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="font-size:14px;font-weight:600;" id="team-title">Équipe — Boulangerie Coin</div>
+        <button class="btn btn-primary btn-sm" onclick="openAddEmployee()" data-i18n="addEmployee">+ Ajouter employé</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr>
+            <th data-i18n="colEmp">Employé</th>
+            <th data-i18n="colRole">Rôle</th>
+            <th data-i18n="colStores">Boutiques</th>
+            <th data-i18n="colHours">Heures / sem.</th>
+            <th data-i18n="colStatus">Statut</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="team-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ALERTS PANEL -->
+    <div class="panel" id="panel-alerts">
+      <div class="card">
+        <div class="card-hdr"><div class="card-title" data-i18n="allAlerts">Toutes les alertes</div></div>
+        <div class="alert-row"><div class="adot" style="background:var(--danger)"></div><div><div class="amsg" data-i18n="alert1"><strong>Sophie L.</strong> et <strong>Marc R.</strong> se chevauchent jeudi.</div><div class="aact" onclick="openAddShift()" data-i18n="resolveConflict">Résoudre →</div></div></div>
+        <div class="alert-row"><div class="adot" style="background:var(--warning)"></div><div><div class="amsg" data-i18n="alert2"><strong>Leila T.</strong> pas encore pointée.</div></div></div>
+        <div class="alert-row"><div class="adot" style="background:var(--danger)"></div><div><div class="amsg" data-i18n="alertGeoOut"><strong>Ana C.</strong> pointée à 340m — hors rayon.</div></div></div>
+        <div class="alert-row"><div class="adot" style="background:var(--accent2)"></div><div><div class="amsg" data-i18n="alert3"><strong>Karim B.</strong> pointé à 22m. ✓</div></div></div>
+      </div>
+    </div>
+
+    <!-- LEAVE PANEL -->
+    <div class="panel" id="panel-leave">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div>
+          <div style="font-size:16px;font-weight:600;" data-i18n="leaveTitle">Congés & Absences</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;" data-i18n="leaveSubtitle">Gérez les demandes de congés de votre équipe</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="exportLeave()" data-i18n="btnExportLeave">Exporter CSV</button>
+      </div>
+
+      <!-- BALANCE METRICS -->
+      <div class="leave-metrics" id="leave-metrics"></div>
+
+      <!-- FILTERS -->
+      <div class="leave-filter-row">
+        <button class="lf-pill active" onclick="filterLeave('all',this)" data-i18n="filterAll">Tous</button>
+        <button class="lf-pill" onclick="filterLeave('pending',this)" data-i18n="filterPending">En attente <span id="pending-count" style="background:var(--warning);color:#000;font-size:10px;padding:1px 5px;border-radius:10px;margin-left:3px;">2</span></button>
+        <button class="lf-pill" onclick="filterLeave('approved',this)" data-i18n="filterApproved">Approuvés</button>
+        <button class="lf-pill" onclick="filterLeave('rejected',this)" data-i18n="filterRejected">Refusés</button>
+      </div>
+
+      <!-- REQUESTS TABLE -->
+      <div class="leave-table-wrap">
+        <table class="leave-table">
+          <thead><tr>
+            <th data-i18n="colEmp">Employé</th>
+            <th data-i18n="colLeaveType">Type</th>
+            <th data-i18n="colLeaveDates">Dates</th>
+            <th data-i18n="colLeaveDays">Jours</th>
+            <th data-i18n="colLeaveNote">Note</th>
+            <th data-i18n="colStatus">Statut</th>
+            <th data-i18n="colActions">Actions</th>
+          </tr></thead>
+          <tbody id="leave-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- PER-EMPLOYEE BALANCE SUMMARY -->
+      <div style="font-size:14px;font-weight:600;margin-bottom:12px;" data-i18n="leaveBalanceTitle">Solde par employé</div>
+      <div class="leave-summary-grid" id="leave-summary-grid"></div>
+    </div>
+
+    <!-- STORES PANEL -->
+    <div class="panel" id="panel-stores">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div>
+          <div style="font-size:16px;font-weight:600;" data-i18n="storesTitle">Mes boutiques</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;" data-i18n="storesSubtitle">Gérez les adresses, rayons GPS et équipes</div>
+        </div>
+        <button class="btn btn-primary" onclick="openAddStore()" data-i18n="addStore">+ Ajouter une boutique</button>
+      </div>
+      <div class="stores-grid" id="stores-grid"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ ADD / EDIT STORE MODAL ══ -->
+<div class="modal-overlay" id="modal-store" onclick="if(event.target===this)closeModal('store')">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="store-modal-title" data-i18n="addStoreTitle">Nouvelle boutique</div>
+      <div class="modal-close" onclick="closeModal('store')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label" data-i18n="labelStoreName">Nom de la boutique</label>
+        <input class="form-input" id="in-store-name" type="text" placeholder="ex. Boulangerie Coin">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="labelStoreType">Type d'établissement</label>
+        <select class="form-select" id="in-store-type">
+          <option value="Boulangerie">Boulangerie</option>
+          <option value="Épicerie">Épicerie</option>
+          <option value="Restaurant">Restaurant</option>
+          <option value="Salon de coiffure">Salon de coiffure</option>
+          <option value="Pharmacie">Pharmacie</option>
+          <option value="Café">Café</option>
+          <option value="Boutique retail">Boutique retail</option>
+          <option value="Autre">Autre</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="labelStoreAddr">Adresse complète <span style="color:var(--accent)">(référence GPS pointage)</span></label>
+        <input class="form-input" id="in-store-addr" type="text" placeholder="ex. 12 Rue de la Roquette, Paris 75011">
+        <div class="form-hint" data-i18n="addrHint">Cette adresse sera utilisée comme point de référence pour valider le pointage GPS des employés.</div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" data-i18n="labelLat">Latitude</label>
+          <input class="form-input" id="in-lat" type="text" placeholder="48.8553">
+          <div class="form-hint" data-i18n="latHint">Trouvez sur Google Maps</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="labelLng">Longitude</label>
+          <input class="form-input" id="in-lng" type="text" placeholder="2.3700">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="labelRadius">Rayon GPS autorisé (mètres)</label>
+        <input class="form-input" id="in-radius" type="number" value="200" min="50" max="1000">
+        <div class="form-hint" data-i18n="radiusHint">Les employés doivent être dans ce rayon pour pointer. Recommandé : 100–300m.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="labelColor">Couleur</label>
+        <div class="color-row" id="color-picker"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('store')" data-i18n="btnCancel">Annuler</button>
+      <button class="btn btn-primary" onclick="saveStore()" data-i18n="btnSaveStore">Enregistrer la boutique</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD SHIFT MODAL -->
+<div class="modal-overlay" id="modal-shift" onclick="if(event.target===this)closeModal('shift')">
+  <div class="modal" style="width:400px;">
+    <div class="modal-hdr">
+      <div class="modal-title" data-i18n="modalShiftTitle">Ajouter un shift</div>
+      <div class="modal-close" onclick="closeModal('shift')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label" data-i18n="labelEmp">Employé</label>
+        <select class="form-select" id="sel-emp"></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="labelDay">Jour</label>
+        <select class="form-select" id="sel-day"></select>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label" data-i18n="labelStart">Début</label><input class="form-input" type="time" value="08:00"></div>
+        <div class="form-group"><label class="form-label" data-i18n="labelEnd">Fin</label><input class="form-input" type="time" value="16:00"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('shift')" data-i18n="btnCancel">Annuler</button>
+      <button class="btn btn-primary" onclick="closeModal('shift')" data-i18n="btnSave">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD EMPLOYEE MODAL -->
+<div class="modal-overlay" id="modal-emp" onclick="if(event.target===this)closeModal('emp')">
+  <div class="modal" style="width:420px;">
+    <div class="modal-hdr">
+      <div class="modal-title" data-i18n="addEmpTitle">Ajouter un employé</div>
+      <div class="modal-close" onclick="closeModal('emp')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label" data-i18n="labelFirst">Prénom</label><input class="form-input" id="in-firstname" type="text" placeholder="Sophie"></div>
+        <div class="form-group"><label class="form-label" data-i18n="labelLast">Nom</label><input class="form-input" id="in-lastname" type="text" placeholder="Laurent"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="labelRole">Rôle</label>
+        <select class="form-select" id="in-role">
+          <option>Caissier(e)</option><option>Boulanger(e)</option><option>Manutention</option>
+          <option>Superviseur</option><option>Serveur(se)</option><option>Cuisinier(e)</option><option>Autre</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="labelPhone">Téléphone (pour SMS)</label>
+        <input class="form-input" id="in-phone" type="tel" placeholder="+33 6 12 34 56 78">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="labelAssignStores">Affecter aux boutiques</label>
+        <div id="store-checkboxes" style="display:flex;flex-direction:column;gap:8px;margin-top:4px;"></div>
+        <div class="form-hint" data-i18n="sharedHint">Un employé peut travailler dans plusieurs boutiques. Ses shifts seront visibles dans chacune.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('emp')" data-i18n="btnCancel">Annuler</button>
+      <button class="btn btn-primary" onclick="saveEmployee()" data-i18n="btnSaveEmp">Ajouter l'employé</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══ DATA ══ */
+const COLORS=['#6c6fff','#4ade80','#fb923c','#f472b6','#a78bfa','#34d399','#f87171','#fbbf24','#38bdf8','#e879f9'];
+let selectedColor=COLORS[0];
+let editingStoreId=null;
+
+const stores=[
+  {id:1,name:'Boulangerie Coin',type:'Boulangerie',addr:'12 Rue de la Roquette, Paris 75011',lat:48.8553,lng:2.3700,radius:200,color:'#6c6fff',active:true},
+  {id:2,name:'Épicerie du Nord',type:'Épicerie',addr:'47 Rue de la Goutte d\'Or, Paris 75018',lat:48.8840,lng:2.3530,radius:150,color:'#4ade80',active:false},
+];
+let activeStoreId=1;
+let nextStoreId=3;
+
+const employees=[
+  {id:1,name:'Sophie L.',role:'Caissière',color:'#6c6fff',hours:32,stores:[1],shared:false},
+  {id:2,name:'Marc R.',role:'Boulanger',color:'#4ade80',hours:40,stores:[1],shared:false},
+  {id:3,name:'Karim B.',role:'Manutention',color:'#fb923c',hours:28,stores:[1,2],shared:true},
+  {id:4,name:'Leila T.',role:'Caissière',color:'#f472b6',hours:35,stores:[1],shared:false},
+  {id:5,name:'Paul D.',role:'Superviseur',color:'#a78bfa',hours:44,stores:[1,2],shared:true},
+  {id:6,name:'Ana C.',role:'Caissière',color:'#34d399',hours:24,stores:[2],shared:false},
+];
+let nextEmpId=7;
+
+const scheduleData=[
+  ['m','f','m','f','m','f','off'],
+  ['f','off','f','m','f','m','m'],
+  ['a','m','off','m','a','off','m'],
+  ['m','a','m','off','m','a','off'],
+  ['f','f','f','f','f','off','off'],
+];
+
+const geoRows=[
+  {empId:2,shift:'6:00–14:00',time:'06:03',dist:14,status:'ok'},
+  {empId:1,shift:'14:00–22:00',time:'14:01',dist:8,status:'ok'},
+  {empId:3,shift:'6:00–14:00',time:'05:58',dist:22,status:'ok'},
+  {empId:5,shift:'8:00–17:00',time:'07:55',dist:31,status:'ok'},
+  {empId:6,shift:'14:00–22:00',time:'14:12',dist:340,status:'out'},
+  {empId:4,shift:'14:00–22:00',time:'—',dist:null,status:'pending'},
+];
+
+/* ══ I18N ══ */
+const I={
+  fr:{dir:'ltr',flag:'🇫🇷',name:'Français',
+    myStores:'Mes boutiques',addStore:'+ Ajouter une boutique',currentStore:'Boutique active',account:'Compte',
+    navSchedule:'Planning',navGeo:'Pointages GPS',navTeam:'Équipe',navAlerts:'Alertes',navStores:'Mes boutiques',roleOwner:'Gérant',
+    btnExport:'Exporter PDF',btnNotify:"Notifier l'équipe",btnAddShift:'+ Ajouter un shift',
+    metricStaff:'Effectif',metricStaffSub:'Confirmés',metricHours:'Heures',metricHoursSub:'cette semaine',
+    metricGeoOk:'GPS OK',metricGeoSub:"aujourd'hui",metricConflicts:'Conflits',metricConflictsSub:'à résoudre',
+    weekLabel:'15 mar – 21 mar 2026',thisWeek:'Cette semaine',colEmp:'Employé',
+    dayMon:'Lun',dayTue:'Mar',dayWed:'Mer',dayThu:'Jeu',dayFri:'Ven',daySat:'Sam',daySun:'Dim',
+    alertsTitle:'Alertes',viewAll:'Voir tout',resolveConflict:'Résoudre →',viewGps:'Voir GPS →',
+    alert1:'<strong>Sophie L.</strong> et <strong>Marc R.</strong> se chevauchent jeudi.',
+    alert2:'<strong>Leila T.</strong> pas encore pointée — shift commencé il y a 25 min.',
+    alert3:'<strong>Karim B.</strong> pointé à 22m. ✓',alertGeoOut:'<strong>Ana C.</strong> pointée à 340m — hors rayon.',
+    weekSummary:'Résumé',labourCost:"Coût MO",geoCompliance:'Conformité GPS',confirmed:'Shifts confirmés',
+    geoPresent:'Présents GPS',geoInRadius:'dans le rayon',geoLate:'En retard',geoNoSignal:'pas de signal',
+    geoOutOfRange:'Hors rayon',geoAlertSent:'alerte envoyée',geoRadius:'Rayon',
+    geoTableTitle:'Pointages du jour',liveUpdates:'Temps réel',
+    colShift:'Shift',colClockIn:'Pointage',colDistance:'Distance',colStatus:'Statut',colRole:'Rôle',colStores:'Boutiques',colHours:'Heures/sem.',
+    allAlerts:'Toutes les alertes',
+    storesTitle:'Mes boutiques',storesSubtitle:'Gérez les adresses, rayons GPS et équipes',
+    addEmployee:'+ Ajouter employé',teamLabel:'Équipe',
+    addStoreTitle:'Nouvelle boutique',editStoreTitle:'Modifier la boutique',
+    labelStoreName:'Nom de la boutique',labelStoreType:"Type d'établissement",
+    labelStoreAddr:'Adresse complète',addrHint:'Utilisée comme point de référence GPS pour le pointage des employés.',
+    labelLat:'Latitude',labelLng:'Longitude',latHint:'Trouvez sur Google Maps',
+    labelRadius:'Rayon GPS (mètres)',radiusHint:'Recommandé : 100–300m.',
+    labelColor:'Couleur',btnCancel:'Annuler',btnSaveStore:'Enregistrer la boutique',
+    modalShiftTitle:'Ajouter un shift',labelEmp:'Employé',labelDay:'Jour',labelStart:'Début',labelEnd:'Fin',btnSave:'Enregistrer',
+    addEmpTitle:'Ajouter un employé',labelFirst:'Prénom',labelLast:'Nom',labelRole:'Rôle',labelPhone:'Téléphone (SMS)',
+    labelAssignStores:'Affecter aux boutiques',sharedHint:'Un employé peut travailler dans plusieurs boutiques.',btnSaveEmp:"Ajouter l'employé",
+    geoStatusOk:'En boutique',geoStatusOut:'Hors rayon',geoStatusPending:'Pas encore pointé',
+    sharedLabel:'Partagé',activeLabel:'Actif',editBtn:'Modifier',deleteBtn:'Supprimer',
+    selectStoreBtn:'Sélectionner',activeStoreBtn:'Boutique active',
+    dayOptions:['Lun 15 mar','Mar 16 mar','Mer 17 mar','Jeu 18 mar','Ven 19 mar','Sam 20 mar','Dim 21 mar'],
+    shiftM:'Matin',shiftA:'Après-midi',shiftF:'Journée',
+    navLeave:'Congés',leaveTitle:'Congés & Absences',leaveSubtitle:'Gérez les demandes de congés de votre équipe',
+    btnExportLeave:'Exporter CSV',filterAll:'Tous',filterPending:'En attente',filterApproved:'Approuvés',filterRejected:'Refusés',
+    colLeaveType:'Type',colLeaveDates:'Dates',colLeaveDays:'Jours',colLeaveNote:'Note',colActions:'Actions',
+    leaveBalanceTitle:'Solde par employé',
+    leavePending:'En attente',leaveApproved:'Approuvé',leaveRejected:'Refusé',
+    lblPaid:'Congés payés',lblRTT:'RTT',lblSick:'Maladie',
+    tooltipApprove:'Approuver',tooltipReject:'Refuser',
+    toastApproved:'✓ Demande approuvée — employé notifié',toastRejected:'Demande refusée — employé notifié',
+    leaveRequests:[
+      {id:1,empId:1,type:'Congé payé',from:'24 mar',to:'28 mar',days:5,note:'Vacances Pâques',status:'pending'},
+      {id:2,empId:3,type:'RTT',from:'20 mar',to:'20 mar',days:1,note:'',status:'pending'},
+      {id:3,empId:2,type:'Congé payé',from:'10 fév',to:'14 fév',days:5,note:'Ski',status:'approved'},
+      {id:4,empId:4,type:'Maladie',from:'8 jan',to:'9 jan',days:2,note:'Grippe',status:'approved'},
+      {id:5,empId:5,type:'Sans solde',from:'2 jan',to:'3 jan',days:2,note:'Déménagement',status:'rejected'},
+    ],
+    empBalances:[
+      {empId:1,paid:18,rtt:3,sick:2},
+      {empId:2,paid:22,rtt:2,sick:0},
+      {empId:3,paid:12,rtt:4,sick:1},
+      {empId:4,paid:20,rtt:0,sick:3},
+      {empId:5,paid:25,rtt:5,sick:0},
+    ],
+  },
+  en:{dir:'ltr',flag:'🇬🇧',name:'English',
+    myStores:'My stores',addStore:'+ Add store',currentStore:'Active store',account:'Account',
+    navSchedule:'Schedule',navGeo:'GPS Clock-ins',navTeam:'Team',navAlerts:'Alerts',navStores:'My stores',roleOwner:'Owner',
+    btnExport:'Export PDF',btnNotify:'Notify team',btnAddShift:'+ Add shift',
+    metricStaff:'Staff',metricStaffSub:'Confirmed',metricHours:'Hours',metricHoursSub:'this week',
+    metricGeoOk:'GPS OK',metricGeoSub:'today',metricConflicts:'Conflicts',metricConflictsSub:'to resolve',
+    weekLabel:'Mar 15 – Mar 21, 2026',thisWeek:'This week',colEmp:'Employee',
+    dayMon:'Mon',dayTue:'Tue',dayWed:'Wed',dayThu:'Thu',dayFri:'Fri',daySat:'Sat',daySun:'Sun',
+    alertsTitle:'Alerts',viewAll:'View all',resolveConflict:'Resolve →',viewGps:'View GPS →',
+    alert1:'<strong>Sophie L.</strong> and <strong>Marc R.</strong> overlap Thursday.',
+    alert2:'<strong>Leila T.</strong> not clocked in — shift started 25 min ago.',
+    alert3:'<strong>Karim B.</strong> clocked in 22m away. ✓',alertGeoOut:'<strong>Ana C.</strong> clocked in 340m away — out of range.',
+    weekSummary:'Summary',labourCost:'Labour cost',geoCompliance:'GPS compliance',confirmed:'Shifts confirmed',
+    geoPresent:'Present (GPS)',geoInRadius:'in range',geoLate:'Late',geoNoSignal:'no signal',
+    geoOutOfRange:'Out of range',geoAlertSent:'alert sent',geoRadius:'Radius',
+    geoTableTitle:"Today's clock-ins",liveUpdates:'Live',
+    colShift:'Shift',colClockIn:'Clock-in',colDistance:'Distance',colStatus:'Status',colRole:'Role',colStores:'Stores',colHours:'Hrs/week',
+    allAlerts:'All alerts',
+    storesTitle:'My stores',storesSubtitle:'Manage addresses, GPS radius and teams',
+    addEmployee:'+ Add employee',teamLabel:'Team',
+    addStoreTitle:'New store',editStoreTitle:'Edit store',
+    labelStoreName:'Store name',labelStoreType:'Business type',
+    labelStoreAddr:'Full address',addrHint:'Used as GPS reference point for employee clock-in verification.',
+    labelLat:'Latitude',labelLng:'Longitude',latHint:'Find on Google Maps',
+    labelRadius:'GPS radius (meters)',radiusHint:'Recommended: 100–300m.',
+    labelColor:'Color',btnCancel:'Cancel',btnSaveStore:'Save store',
+    modalShiftTitle:'Add shift',labelEmp:'Employee',labelDay:'Day',labelStart:'Start',labelEnd:'End',btnSave:'Save',
+    addEmpTitle:'Add employee',labelFirst:'First name',labelLast:'Last name',labelRole:'Role',labelPhone:'Phone (SMS)',
+    labelAssignStores:'Assign to stores',sharedHint:'An employee can work across multiple stores.',btnSaveEmp:'Add employee',
+    geoStatusOk:'In store',geoStatusOut:'Out of range',geoStatusPending:'Not clocked in',
+    sharedLabel:'Shared',activeLabel:'Active',editBtn:'Edit',deleteBtn:'Delete',
+    selectStoreBtn:'Select',activeStoreBtn:'Active store',
+    dayOptions:['Mon Mar 15','Tue Mar 16','Wed Mar 17','Thu Mar 18','Fri Mar 19','Sat Mar 20','Sun Mar 21'],
+    shiftM:'Morning',shiftA:'Afternoon',shiftF:'Full day',
+    navLeave:'Leave',leaveTitle:'Leave & Absences',leaveSubtitle:'Manage your team leave requests',
+    btnExportLeave:'Export CSV',filterAll:'All',filterPending:'Pending',filterApproved:'Approved',filterRejected:'Rejected',
+    colLeaveType:'Type',colLeaveDates:'Dates',colLeaveDays:'Days',colLeaveNote:'Note',colActions:'Actions',
+    leaveBalanceTitle:'Balance per employee',
+    leavePending:'Pending',leaveApproved:'Approved',leaveRejected:'Rejected',
+    lblPaid:'Paid leave',lblRTT:'RTT',lblSick:'Sick days',
+    tooltipApprove:'Approve',tooltipReject:'Reject',
+    toastApproved:'✓ Request approved — employee notified',toastRejected:'Request rejected — employee notified',
+    leaveRequests:[
+      {id:1,empId:1,type:'Paid leave',from:'Mar 24',to:'Mar 28',days:5,note:'Easter holidays',status:'pending'},
+      {id:2,empId:3,type:'RTT',from:'Mar 20',to:'Mar 20',days:1,note:'',status:'pending'},
+      {id:3,empId:2,type:'Paid leave',from:'Feb 10',to:'Feb 14',days:5,note:'Ski trip',status:'approved'},
+      {id:4,empId:4,type:'Sick leave',from:'Jan 8',to:'Jan 9',days:2,note:'Flu',status:'approved'},
+      {id:5,empId:5,type:'Unpaid',from:'Jan 2',to:'Jan 3',days:2,note:'Moving',status:'rejected'},
+    ],
+    empBalances:[
+      {empId:1,paid:18,rtt:3,sick:2},
+      {empId:2,paid:22,rtt:2,sick:0},
+      {empId:3,paid:12,rtt:4,sick:1},
+      {empId:4,paid:20,rtt:0,sick:3},
+      {empId:5,paid:25,rtt:5,sick:0},
+    ],
+  },
+  ar:{dir:'rtl',flag:'🇲🇦',name:'العربية',
+    myStores:'متاجري',addStore:'+ إضافة متجر',currentStore:'المتجر النشط',account:'الحساب',
+    navSchedule:'الجدول',navGeo:'تسجيل GPS',navTeam:'الفريق',navAlerts:'التنبيهات',navStores:'متاجري',roleOwner:'المدير',
+    btnExport:'تصدير PDF',btnNotify:'إخطار الفريق',btnAddShift:'+ إضافة وردية',
+    metricStaff:'الموظفون',metricStaffSub:'مؤكدون',metricHours:'الساعات',metricHoursSub:'هذا الأسبوع',
+    metricGeoOk:'GPS صحيح',metricGeoSub:'اليوم',metricConflicts:'التعارضات',metricConflictsSub:'للحل',
+    weekLabel:'١٥–٢١ مار ٢٠٢٦',thisWeek:'هذا الأسبوع',colEmp:'الموظف',
+    dayMon:'الإثنين',dayTue:'الثلاثاء',dayWed:'الأربعاء',dayThu:'الخميس',dayFri:'الجمعة',daySat:'السبت',daySun:'الأحد',
+    alertsTitle:'التنبيهات',viewAll:'عرض الكل',resolveConflict:'حل ←',viewGps:'GPS ←',
+    alert1:'<strong>صوفي</strong> و<strong>مارك</strong> يتعارضان الخميس.',
+    alert2:'<strong>ليلى</strong> لم تسجل حضورها بعد.',
+    alert3:'<strong>كريم</strong> سجّل على بعد 22م. ✓',alertGeoOut:'<strong>آنا</strong> سجّلت على بعد 340م.',
+    weekSummary:'ملخص',labourCost:'تكلفة العمالة',geoCompliance:'الامتثال GPS',confirmed:'الورديات المؤكدة',
+    geoPresent:'حاضرون',geoInRadius:'في النطاق',geoLate:'متأخر',geoNoSignal:'لا إشارة',
+    geoOutOfRange:'خارج النطاق',geoAlertSent:'تم إرسال تنبيه',geoRadius:'النطاق',
+    geoTableTitle:'تسجيلات اليوم',liveUpdates:'وقت فعلي',
+    colShift:'الوردية',colClockIn:'التسجيل',colDistance:'المسافة',colStatus:'الحالة',colRole:'الدور',colStores:'المتاجر',colHours:'ساعات/أسبوع',
+    allAlerts:'كل التنبيهات',
+    storesTitle:'متاجري',storesSubtitle:'إدارة العناوين ونطاقات GPS والفرق',
+    addEmployee:'+ إضافة موظف',teamLabel:'الفريق',
+    addStoreTitle:'متجر جديد',editStoreTitle:'تعديل المتجر',
+    labelStoreName:'اسم المتجر',labelStoreType:'نوع المنشأة',
+    labelStoreAddr:'العنوان الكامل',addrHint:'يُستخدم كنقطة مرجعية لـ GPS للتحقق من تسجيل حضور الموظفين.',
+    labelLat:'خط العرض',labelLng:'خط الطول',latHint:'ابحث على خرائط جوجل',
+    labelRadius:'نطاق GPS (أمتار)',radiusHint:'موصى به: ١٠٠–٣٠٠ م.',
+    labelColor:'اللون',btnCancel:'إلغاء',btnSaveStore:'حفظ المتجر',
+    modalShiftTitle:'إضافة وردية',labelEmp:'الموظف',labelDay:'اليوم',labelStart:'البداية',labelEnd:'النهاية',btnSave:'حفظ',
+    addEmpTitle:'إضافة موظف',labelFirst:'الاسم الأول',labelLast:'اسم العائلة',labelRole:'الدور',labelPhone:'الهاتف (SMS)',
+    labelAssignStores:'تعيين للمتاجر',sharedHint:'يمكن للموظف العمل في عدة متاجر.',btnSaveEmp:'إضافة الموظف',
+    geoStatusOk:'في المتجر',geoStatusOut:'خارج النطاق',geoStatusPending:'لم يسجل بعد',
+    sharedLabel:'مشترك',activeLabel:'نشط',editBtn:'تعديل',deleteBtn:'حذف',
+    selectStoreBtn:'اختيار',activeStoreBtn:'المتجر النشط',
+    dayOptions:['الإثنين ١٥','الثلاثاء ١٦','الأربعاء ١٧','الخميس ١٨','الجمعة ١٩','السبت ٢٠','الأحد ٢١'],
+    shiftM:'صباحي',shiftA:'مسائي',shiftF:'يوم كامل',
+    navLeave:'الإجازات',leaveTitle:'الإجازات والغيابات',leaveSubtitle:'إدارة طلبات إجازة فريقك',
+    btnExportLeave:'تصدير CSV',filterAll:'الكل',filterPending:'في الانتظار',filterApproved:'موافق عليها',filterRejected:'مرفوضة',
+    colLeaveType:'النوع',colLeaveDates:'التواريخ',colLeaveDays:'الأيام',colLeaveNote:'ملاحظة',colActions:'الإجراءات',
+    leaveBalanceTitle:'الرصيد لكل موظف',
+    leavePending:'في الانتظار',leaveApproved:'موافق عليه',leaveRejected:'مرفوض',
+    lblPaid:'إجازة مدفوعة',lblRTT:'RTT',lblSick:'مرض',
+    tooltipApprove:'موافقة',tooltipReject:'رفض',
+    toastApproved:'✓ تمت الموافقة — تم إخطار الموظف',toastRejected:'تم الرفض — تم إخطار الموظف',
+    leaveRequests:[
+      {id:1,empId:1,type:'إجازة مدفوعة',from:'٢٤ مار',to:'٢٨ مار',days:5,note:'عطلة عيد الفصح',status:'pending'},
+      {id:2,empId:3,type:'RTT',from:'٢٠ مار',to:'٢٠ مار',days:1,note:'',status:'pending'},
+      {id:3,empId:2,type:'إجازة مدفوعة',from:'١٠ فبر',to:'١٤ فبر',days:5,note:'التزلج',status:'approved'},
+      {id:4,empId:4,type:'إجازة مرضية',from:'٨ يناير',to:'٩ يناير',days:2,note:'إنفلونزا',status:'approved'},
+      {id:5,empId:5,type:'بدون أجر',from:'٢ يناير',to:'٣ يناير',days:2,note:'انتقال',status:'rejected'},
+    ],
+    empBalances:[
+      {empId:1,paid:18,rtt:3,sick:2},
+      {empId:2,paid:22,rtt:2,sick:0},
+      {empId:3,paid:12,rtt:4,sick:1},
+      {empId:4,paid:20,rtt:0,sick:3},
+      {empId:5,paid:25,rtt:5,sick:0},
+    ],
+  },
+  es:{dir:'ltr',flag:'🇪🇸',name:'Español',
+    myStores:'Mis tiendas',addStore:'+ Agregar tienda',currentStore:'Tienda activa',account:'Cuenta',
+    navSchedule:'Turnos',navGeo:'Fichajes GPS',navTeam:'Equipo',navAlerts:'Alertas',navStores:'Mis tiendas',roleOwner:'Gerente',
+    btnExport:'Exportar PDF',btnNotify:'Notificar equipo',btnAddShift:'+ Agregar turno',
+    metricStaff:'Personal',metricStaffSub:'Confirmados',metricHours:'Horas',metricHoursSub:'esta semana',
+    metricGeoOk:'GPS OK',metricGeoSub:'hoy',metricConflicts:'Conflictos',metricConflictsSub:'por resolver',
+    weekLabel:'15 mar – 21 mar 2026',thisWeek:'Esta semana',colEmp:'Empleado',
+    dayMon:'Lun',dayTue:'Mar',dayWed:'Mié',dayThu:'Jue',dayFri:'Vie',daySat:'Sáb',daySun:'Dom',
+    alertsTitle:'Alertas',viewAll:'Ver todo',resolveConflict:'Resolver →',viewGps:'Ver GPS →',
+    alert1:'<strong>Sophie L.</strong> y <strong>Marc R.</strong> se solapan el jueves.',
+    alert2:'<strong>Leila T.</strong> no ha fichado aún.',
+    alert3:'<strong>Karim B.</strong> fichó a 22m. ✓',alertGeoOut:'<strong>Ana C.</strong> fichó a 340m — fuera del radio.',
+    weekSummary:'Resumen',labourCost:'Coste laboral',geoCompliance:'Cumplimiento GPS',confirmed:'Turnos confirmados',
+    geoPresent:'Presentes GPS',geoInRadius:'en rango',geoLate:'Tarde',geoNoSignal:'sin señal',
+    geoOutOfRange:'Fuera de rango',geoAlertSent:'alerta enviada',geoRadius:'Radio',
+    geoTableTitle:'Fichajes de hoy',liveUpdates:'En vivo',
+    colShift:'Turno',colClockIn:'Fichaje',colDistance:'Distancia',colStatus:'Estado',colRole:'Rol',colStores:'Tiendas',colHours:'Hrs/semana',
+    allAlerts:'Todas las alertas',
+    storesTitle:'Mis tiendas',storesSubtitle:'Gestiona direcciones, radio GPS y equipos',
+    addEmployee:'+ Agregar empleado',teamLabel:'Equipo',
+    addStoreTitle:'Nueva tienda',editStoreTitle:'Editar tienda',
+    labelStoreName:'Nombre de la tienda',labelStoreType:'Tipo de negocio',
+    labelStoreAddr:'Dirección completa',addrHint:'Usada como punto de referencia GPS para verificar el fichaje.',
+    labelLat:'Latitud',labelLng:'Longitud',latHint:'Encuentra en Google Maps',
+    labelRadius:'Radio GPS (metros)',radiusHint:'Recomendado: 100–300m.',
+    labelColor:'Color',btnCancel:'Cancelar',btnSaveStore:'Guardar tienda',
+    modalShiftTitle:'Agregar turno',labelEmp:'Empleado',labelDay:'Día',labelStart:'Inicio',labelEnd:'Fin',btnSave:'Guardar',
+    addEmpTitle:'Agregar empleado',labelFirst:'Nombre',labelLast:'Apellido',labelRole:'Rol',labelPhone:'Teléfono (SMS)',
+    labelAssignStores:'Asignar a tiendas',sharedHint:'Un empleado puede trabajar en varias tiendas.',btnSaveEmp:'Agregar empleado',
+    geoStatusOk:'En tienda',geoStatusOut:'Fuera de rango',geoStatusPending:'Sin fichar',
+    sharedLabel:'Compartido',activeLabel:'Activo',editBtn:'Editar',deleteBtn:'Eliminar',
+    selectStoreBtn:'Seleccionar',activeStoreBtn:'Tienda activa',
+    dayOptions:['Lun 15 mar','Mar 16 mar','Mié 17 mar','Jue 18 mar','Vie 19 mar','Sáb 20 mar','Dom 21 mar'],
+    shiftM:'Mañana',shiftA:'Tarde',shiftF:'Jornada completa',
+    navLeave:'Ausencias',leaveTitle:'Ausencias & Vacaciones',leaveSubtitle:'Gestiona las solicitudes de ausencia de tu equipo',
+    btnExportLeave:'Exportar CSV',filterAll:'Todos',filterPending:'Pendientes',filterApproved:'Aprobados',filterRejected:'Rechazados',
+    colLeaveType:'Tipo',colLeaveDates:'Fechas',colLeaveDays:'Días',colLeaveNote:'Nota',colActions:'Acciones',
+    leaveBalanceTitle:'Saldo por empleado',
+    leavePending:'Pendiente',leaveApproved:'Aprobado',leaveRejected:'Rechazado',
+    lblPaid:'Vacaciones',lblRTT:'RTT',lblSick:'Bajas',
+    tooltipApprove:'Aprobar',tooltipReject:'Rechazar',
+    toastApproved:'✓ Solicitud aprobada — empleado notificado',toastRejected:'Solicitud rechazada — empleado notificado',
+    leaveRequests:[
+      {id:1,empId:1,type:'Vacaciones',from:'24 mar',to:'28 mar',days:5,note:'Semana Santa',status:'pending'},
+      {id:2,empId:3,type:'RTT',from:'20 mar',to:'20 mar',days:1,note:'',status:'pending'},
+      {id:3,empId:2,type:'Vacaciones',from:'10 feb',to:'14 feb',days:5,note:'Esquí',status:'approved'},
+      {id:4,empId:4,type:'Baja',from:'8 ene',to:'9 ene',days:2,note:'Gripe',status:'approved'},
+      {id:5,empId:5,type:'Sin sueldo',from:'2 ene',to:'3 ene',days:2,note:'Mudanza',status:'rejected'},
+    ],
+    empBalances:[
+      {empId:1,paid:18,rtt:3,sick:2},
+      {empId:2,paid:22,rtt:2,sick:0},
+      {empId:3,paid:12,rtt:4,sick:1},
+      {empId:4,paid:20,rtt:0,sick:3},
+      {empId:5,paid:25,rtt:5,sick:0},
+    ],
+  },
+  pt:{dir:'ltr',flag:'🇧🇷',name:'Português',
+    myStores:'Minhas lojas',addStore:'+ Adicionar loja',currentStore:'Loja ativa',account:'Conta',
+    navSchedule:'Escala',navGeo:'Pontos GPS',navTeam:'Equipe',navAlerts:'Alertas',navStores:'Minhas lojas',roleOwner:'Gerente',
+    btnExport:'Exportar PDF',btnNotify:'Notificar equipe',btnAddShift:'+ Adicionar turno',
+    metricStaff:'Equipe',metricStaffSub:'Confirmados',metricHours:'Horas',metricHoursSub:'esta semana',
+    metricGeoOk:'GPS OK',metricGeoSub:'hoje',metricConflicts:'Conflitos',metricConflictsSub:'a resolver',
+    weekLabel:'15 mar – 21 mar 2026',thisWeek:'Esta semana',colEmp:'Funcionário',
+    dayMon:'Seg',dayTue:'Ter',dayWed:'Qua',dayThu:'Qui',dayFri:'Sex',daySat:'Sáb',daySun:'Dom',
+    alertsTitle:'Alertas',viewAll:'Ver tudo',resolveConflict:'Resolver →',viewGps:'Ver GPS →',
+    alert1:'<strong>Sophie L.</strong> e <strong>Marc R.</strong> se sobrepõem na quinta.',
+    alert2:'<strong>Leila T.</strong> ainda não registrou ponto.',
+    alert3:'<strong>Karim B.</strong> registrou a 22m. ✓',alertGeoOut:'<strong>Ana C.</strong> registrou a 340m — fora do raio.',
+    weekSummary:'Resumo',labourCost:'Custo MO',geoCompliance:'Conformidade GPS',confirmed:'Turnos confirmados',
+    geoPresent:'Presentes GPS',geoInRadius:'no raio',geoLate:'Atrasado',geoNoSignal:'sem sinal',
+    geoOutOfRange:'Fora do raio',geoAlertSent:'alerta enviado',geoRadius:'Raio',
+    geoTableTitle:'Pontos de hoje',liveUpdates:'Ao vivo',
+    colShift:'Turno',colClockIn:'Ponto',colDistance:'Distância',colStatus:'Status',colRole:'Função',colStores:'Lojas',colHours:'Hrs/semana',
+    allAlerts:'Todos os alertas',
+    storesTitle:'Minhas lojas',storesSubtitle:'Gerencie endereços, raio GPS e equipes',
+    addEmployee:'+ Adicionar funcionário',teamLabel:'Equipe',
+    addStoreTitle:'Nova loja',editStoreTitle:'Editar loja',
+    labelStoreName:'Nome da loja',labelStoreType:'Tipo de negócio',
+    labelStoreAddr:'Endereço completo',addrHint:'Usado como ponto de referência GPS para verificar o ponto dos funcionários.',
+    labelLat:'Latitude',labelLng:'Longitude',latHint:'Encontre no Google Maps',
+    labelRadius:'Raio GPS (metros)',radiusHint:'Recomendado: 100–300m.',
+    labelColor:'Cor',btnCancel:'Cancelar',btnSaveStore:'Salvar loja',
+    modalShiftTitle:'Adicionar turno',labelEmp:'Funcionário',labelDay:'Dia',labelStart:'Início',labelEnd:'Fim',btnSave:'Salvar',
+    addEmpTitle:'Adicionar funcionário',labelFirst:'Nome',labelLast:'Sobrenome',labelRole:'Função',labelPhone:'Telefone (SMS)',
+    labelAssignStores:'Atribuir às lojas',sharedHint:'Um funcionário pode trabalhar em várias lojas.',btnSaveEmp:'Adicionar funcionário',
+    geoStatusOk:'Na loja',geoStatusOut:'Fora do raio',geoStatusPending:'Sem ponto',
+    sharedLabel:'Compartilhado',activeLabel:'Ativo',editBtn:'Editar',deleteBtn:'Excluir',
+    selectStoreBtn:'Selecionar',activeStoreBtn:'Loja ativa',
+    dayOptions:['Seg 15 mar','Ter 16 mar','Qua 17 mar','Qui 18 mar','Sex 19 mar','Sáb 20 mar','Dom 21 mar'],
+    shiftM:'Manhã',shiftA:'Tarde',shiftF:'Dia inteiro',
+    navLeave:'Férias',leaveTitle:'Férias & Ausências',leaveSubtitle:'Gerencie as solicitações de folga da sua equipe',
+    btnExportLeave:'Exportar CSV',filterAll:'Todos',filterPending:'Pendentes',filterApproved:'Aprovados',filterRejected:'Recusados',
+    colLeaveType:'Tipo',colLeaveDates:'Datas',colLeaveDays:'Dias',colLeaveNote:'Nota',colActions:'Ações',
+    leaveBalanceTitle:'Saldo por funcionário',
+    leavePending:'Pendente',leaveApproved:'Aprovado',leaveRejected:'Recusado',
+    lblPaid:'Férias',lblRTT:'RTT',lblSick:'Licença',
+    tooltipApprove:'Aprovar',tooltipReject:'Recusar',
+    toastApproved:'✓ Solicitação aprovada — funcionário notificado',toastRejected:'Solicitação recusada — funcionário notificado',
+    leaveRequests:[
+      {id:1,empId:1,type:'Férias',from:'24 mar',to:'28 mar',days:5,note:'Páscoa',status:'pending'},
+      {id:2,empId:3,type:'RTT',from:'20 mar',to:'20 mar',days:1,note:'',status:'pending'},
+      {id:3,empId:2,type:'Férias',from:'10 fev',to:'14 fev',days:5,note:'Esqui',status:'approved'},
+      {id:4,empId:4,type:'Licença',from:'8 jan',to:'9 jan',days:2,note:'Gripe',status:'approved'},
+      {id:5,empId:5,type:'Sem remuneração',from:'2 jan',to:'3 jan',days:2,note:'Mudança',status:'rejected'},
+    ],
+    empBalances:[
+      {empId:1,paid:18,rtt:3,sick:2},
+      {empId:2,paid:22,rtt:2,sick:0},
+      {empId:3,paid:12,rtt:4,sick:1},
+      {empId:4,paid:20,rtt:0,sick:3},
+      {empId:5,paid:25,rtt:5,sick:0},
+    ],
+  }
+};
+
+let lang='fr';
+
+/* ══ RENDER FUNCTIONS ══ */
+function getActiveStore(){return stores.find(s=>s.id===activeStoreId)||stores[0];}
+function getStoreEmps(storeId){return employees.filter(e=>e.stores.includes(storeId));}
+
+function renderStoreSwitcher(){
+  const t=I[lang];
+  const list=document.getElementById('store-list');
+  list.innerHTML=stores.map(s=>`
+    <div class="store-btn${s.id===activeStoreId?' active':''}" onclick="switchStore(${s.id})">
+      <div class="store-dot" style="background:${s.color};">${s.name.charAt(0)}</div>
+      <div class="store-info-col">
+        <div class="store-btn-name">${s.name}</div>
+        <div class="store-btn-addr">${s.addr.split(',')[0]}</div>
+      </div>
+      ${s.id===activeStoreId?'<div class="store-active-dot"></div>':''}
+    </div>`).join('');
+}
+
+function renderStoresGrid(){
+  const t=I[lang];
+  const grid=document.getElementById('stores-grid');
+  grid.innerHTML=stores.map(s=>`
+    <div class="store-card${s.id===activeStoreId?' active-store':''}">
+      <div class="sc-top">
+        <div class="sc-icon" style="background:${s.color};">${s.name.charAt(0)}</div>
+        <div>
+          <div class="sc-name">${s.name}</div>
+          <div class="sc-type">${s.type}</div>
+        </div>
+        ${s.id===activeStoreId?`<div style="margin-left:auto;font-size:11px;font-weight:500;color:var(--accent2);background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);padding:2px 8px;border-radius:20px;">${t.activeLabel}</div>`:''}
+      </div>
+      <div class="sc-body">
+        <div class="sc-field">
+          <div class="sc-field-label">${t.labelStoreAddr}</div>
+          <div class="sc-field-val addr">📍 ${s.addr}</div>
+        </div>
+        <div class="sc-field">
+          <div class="sc-field-label">${t.labelLat} / ${t.labelLng}</div>
+          <div class="sc-field-val" style="font-size:12px;color:var(--muted);">${s.lat}, ${s.lng}</div>
+        </div>
+        <div class="sc-field">
+          <div class="sc-field-label">${t.geoRadius}</div>
+          <div class="sc-field-val"><span class="radius-badge">⊙ ${s.radius}m</span></div>
+        </div>
+        <div class="sc-field">
+          <div class="sc-field-label">${t.navTeam}</div>
+          <div class="sc-field-val" style="font-size:12px;">${getStoreEmps(s.id).length} ${t.metricStaff.toLowerCase()}${getStoreEmps(s.id).filter(e=>e.shared).length>0?` · ${getStoreEmps(s.id).filter(e=>e.shared).length} ${t.sharedLabel.toLowerCase()}`:''}</div>
+        </div>
+      </div>
+      <div class="sc-actions">
+        ${s.id!==activeStoreId?`<button class="btn btn-sm" onclick="switchStore(${s.id})">${t.selectStoreBtn}</button>`:`<button class="btn btn-sm" style="opacity:.4;cursor:default;">${t.activeStoreBtn}</button>`}
+        <button class="btn btn-sm" onclick="openEditStore(${s.id})">${t.editBtn}</button>
+        ${stores.length>1?`<button class="btn btn-sm btn-danger" onclick="deleteStore(${s.id})">${t.deleteBtn}</button>`:''}
+      </div>
+    </div>`).join('')+`
+    <div class="add-store-card" onclick="openAddStore()">
+      <div class="add-store-card-icon">＋</div>
+      <div class="add-store-card-text" data-i18n="addStore">${t.addStore}</div>
+    </div>`;
+}
+
+function renderSchedule(){
+  const t=I[lang];
+  const body=document.getElementById('sched-body');
+  const emps=getStoreEmps(activeStoreId);
+  body.innerHTML=emps.slice(0,5).map((emp,i)=>{
+    let row=`<div class="sched-row">
+      <div class="emp-c">
+        <div class="eav" style="background:${emp.color}22;color:${emp.color};">${emp.name.split(' ').map(x=>x[0]).join('')}</div>
+        <div><div class="ename">${emp.name}</div><div class="erole">${emp.role}</div>${emp.shared?`<span class="shared-tag">⇄ ${t.sharedLabel}</span>`:''}</div>
+      </div>`;
+    (scheduleData[i]||['off','off','off','off','off','off','off']).forEach((type,d)=>{
+      const isTod=d===1;
+      row+=`<div class="shift-c${isTod?' today':''}" onclick="openAddShift()">`;
+      if(type==='m') row+=`<div class="sb sm">${t.shiftM}<br>6–14</div>`;
+      else if(type==='a') row+=`<div class="sb sa">${t.shiftA}<br>14–22</div>`;
+      else if(type==='f') row+=`<div class="sb sf">${t.shiftF}<br>8–17</div>`;
+      else row+=`<div class="se">+</div>`;
+      row+='</div>';
+    });
+    row+='</div>';return row;
+  }).join('');
+}
+
+function renderGeoTable(){
+  const t=I[lang];
+  const store=getActiveStore();
+  document.getElementById('geo-radius-display').textContent=store.radius+'m';
+  document.getElementById('geo-addr-short').textContent=store.addr.split(',')[0];
+  const tbody=document.getElementById('geo-tbody');
+  const emps=getStoreEmps(activeStoreId);
+  tbody.innerHTML=geoRows.filter(r=>emps.find(e=>e.id===r.empId)).map(r=>{
+    const emp=employees.find(e=>e.id===r.empId);if(!emp)return'';
+    const bc=r.status==='ok'?'geo-ok':r.status==='out'?'geo-out':'geo-pending';
+    const sl=r.status==='ok'?t.geoStatusOk:r.status==='out'?t.geoStatusOut:t.geoStatusPending;
+    const distTxt=r.dist?`<span class="dist-pill">📍 ${r.dist}m</span>`:'<span style="color:var(--muted)">—</span>';
+    return `<tr>
+      <td><div class="emp-cell-row"><div class="eav" style="background:${emp.color}22;color:${emp.color};width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;">${emp.name.split(' ').map(x=>x[0]).join('')}</div><div><div style="font-size:13px;font-weight:500;">${emp.name}</div><div style="font-size:11px;color:var(--muted);">${emp.role}</div></div></div></td>
+      <td style="font-size:12px;color:var(--muted);">${r.shift}</td>
+      <td style="font-size:13px;font-weight:500;">${r.time}</td>
+      <td>${distTxt}</td>
+      <td><span class="geo-badge ${bc}"><span class="gdot"></span>${sl}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderTeam(){
+  const t=I[lang];
+  const store=getActiveStore();
+  document.getElementById('team-title').textContent=`${t.teamLabel} — ${store.name}`;
+  const tbody=document.getElementById('team-tbody');
+  const emps=getStoreEmps(activeStoreId);
+  tbody.innerHTML=emps.map(emp=>{
+    const storePills=emp.stores.map(sid=>{
+      const s=stores.find(x=>x.id===sid);if(!s)return'';
+      return `<span class="store-pill" style="background:${s.color}18;color:${s.color};border:1px solid ${s.color}35;">
+        <span style="width:6px;height:6px;border-radius:50%;background:${s.color};display:inline-block;"></span>${s.name.split(' ')[0]}
+      </span>`;
+    }).join('');
+    return `<tr>
+      <td><div class="emp-cell-row"><div class="eav" style="background:${emp.color}22;color:${emp.color};width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;">${emp.name.split(' ').map(x=>x[0]).join('')}</div><div><div style="font-size:13px;font-weight:500;">${emp.name}</div>${emp.shared?`<span style="font-size:10px;font-weight:600;color:var(--accent3);">⇄ ${t.sharedLabel}</span>`:''}</div></div></td>
+      <td style="color:var(--muted);font-size:13px;">${emp.role}</td>
+      <td>${storePills}</td>
+      <td style="font-size:13px;">${emp.hours}h</td>
+      <td><span style="font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;background:rgba(74,222,128,.1);color:var(--accent2);border:1px solid rgba(74,222,128,.2);">${t.activeLabel}</span></td>
+      <td><button class="btn btn-sm" style="font-size:11px;" onclick="openAddEmployee()">${t.editBtn}</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderActiveStoreLabel(){
+  const s=getActiveStore();
+  document.getElementById('active-store-label').textContent=s?`${s.name} · ${s.addr.split(',')[0]}`:'';
+  const m=document.getElementById('m-staff');
+  if(m)m.textContent=getStoreEmps(activeStoreId).length;
+}
+
+/* ══ INTERACTIONS ══ */
+function switchStore(id){
+  activeStoreId=id;
+  stores.forEach(s=>s.active=s.id===id);
+  renderStoreSwitcher();
+  renderStoresGrid();
+  renderSchedule();
+  renderGeoTable();
+  renderTeam();
+  renderActiveStoreLabel();
+  renderLeaveMetrics();renderLeaveTable();renderLeaveSummary();
+}
+
+function switchPanel(p,el){
+  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  document.getElementById('panel-'+p).classList.add('active');
+  el.classList.add('active');
+  const t=I[lang];
+  const map={schedule:t.navSchedule,geo:t.navGeo,team:t.navTeam,leave:t.navLeave,alerts:t.navAlerts,stores:t.navStores};
+  document.getElementById('page-title').textContent=map[p]||p;
+  if(p==='leave'){renderLeaveMetrics();renderLeaveTable();renderLeaveSummary();}
+}
+
+/* ── COLOR PICKER ── */
+function buildColorPicker(){
+  const cp=document.getElementById('color-picker');
+  cp.innerHTML=COLORS.map(c=>`<div class="color-swatch${c===selectedColor?' selected':''}" style="background:${c};" onclick="pickColor('${c}',this)"></div>`).join('');
+}
+function pickColor(c,el){
+  selectedColor=c;
+  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+/* ── STORE MODAL ── */
+function openAddStore(){
+  editingStoreId=null;
+  selectedColor=COLORS[stores.length%COLORS.length];
+  document.getElementById('store-modal-title').textContent=I[lang].addStoreTitle;
+  document.getElementById('in-store-name').value='';
+  document.getElementById('in-store-addr').value='';
+  document.getElementById('in-lat').value='';
+  document.getElementById('in-lng').value='';
+  document.getElementById('in-radius').value='200';
+  buildColorPicker();
+  document.getElementById('modal-store').classList.add('open');
+}
+function openEditStore(id){
+  editingStoreId=id;
+  const s=stores.find(x=>x.id===id);if(!s)return;
+  selectedColor=s.color;
+  document.getElementById('store-modal-title').textContent=I[lang].editStoreTitle;
+  document.getElementById('in-store-name').value=s.name;
+  document.getElementById('in-store-addr').value=s.addr;
+  document.getElementById('in-lat').value=s.lat;
+  document.getElementById('in-lng').value=s.lng;
+  document.getElementById('in-radius').value=s.radius;
+  buildColorPicker();
+  document.getElementById('modal-store').classList.add('open');
+}
+function saveStore(){
+  const name=document.getElementById('in-store-name').value.trim();
+  const addr=document.getElementById('in-store-addr').value.trim();
+  const lat=parseFloat(document.getElementById('in-lat').value)||48.8566;
+  const lng=parseFloat(document.getElementById('in-lng').value)||2.3522;
+  const radius=parseInt(document.getElementById('in-radius').value)||200;
+  const type=document.getElementById('in-store-type').value;
+  if(!name){document.getElementById('in-store-name').focus();return;}
+  if(editingStoreId){
+    const s=stores.find(x=>x.id===editingStoreId);
+    if(s){s.name=name;s.addr=addr;s.lat=lat;s.lng=lng;s.radius=radius;s.color=selectedColor;s.type=type;}
+  } else {
+    stores.push({id:nextStoreId++,name,type,addr,lat,lng,radius,color:selectedColor,active:false});
+  }
+  closeModal('store');
+  renderStoreSwitcher();renderStoresGrid();renderActiveStoreLabel();
+}
+function deleteStore(id){
+  if(stores.length<=1)return;
+  const idx=stores.findIndex(s=>s.id===id);
+  if(idx>-1)stores.splice(idx,1);
+  if(activeStoreId===id)activeStoreId=stores[0].id;
+  employees.forEach(e=>{e.stores=e.stores.filter(s=>s!==id);if(e.stores.length===0)e.stores=[stores[0].id];e.shared=e.stores.length>1;});
+  renderStoreSwitcher();renderStoresGrid();renderSchedule();renderGeoTable();renderTeam();renderActiveStoreLabel();
+}
+
+/* ── EMPLOYEE MODAL ── */
+function openAddEmployee(){
+  const boxes=document.getElementById('store-checkboxes');
+  boxes.innerHTML=stores.map(s=>`
+    <label style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);cursor:pointer;">
+      <input type="checkbox" value="${s.id}" style="accent-color:${s.color};width:14px;height:14px;" checked>
+      <div class="store-dot" style="background:${s.color};width:22px;height:22px;border-radius:6px;font-size:10px;">${s.name.charAt(0)}</div>
+      <div><div style="font-size:13px;font-weight:500;">${s.name}</div><div style="font-size:11px;color:var(--muted);">${s.addr.split(',')[0]}</div></div>
+    </label>`).join('');
+  document.getElementById('in-firstname').value='';
+  document.getElementById('in-lastname').value='';
+  document.getElementById('in-phone').value='';
+  document.getElementById('modal-emp').classList.add('open');
+}
+function saveEmployee(){
+  const first=document.getElementById('in-firstname').value.trim();
+  const last=document.getElementById('in-lastname').value.trim();
+  if(!first){document.getElementById('in-firstname').focus();return;}
+  const role=document.getElementById('in-role').value;
+  const checked=[...document.querySelectorAll('#store-checkboxes input:checked')].map(x=>parseInt(x.value));
+  const storeIds=checked.length>0?checked:[activeStoreId];
+  employees.push({id:nextEmpId++,name:`${first} ${last.charAt(0)}.`,role,color:COLORS[employees.length%COLORS.length],hours:0,stores:storeIds,shared:storeIds.length>1});
+  closeModal('emp');
+  renderTeam();renderSchedule();renderStoreSwitcher();renderStoresGrid();
+}
+
+function openAddShift(){
+  const t=I[lang];
+  const sel=document.getElementById('sel-emp');
+  sel.innerHTML=getStoreEmps(activeStoreId).map(e=>`<option>${e.name} — ${e.role}</option>`).join('');
+  const selD=document.getElementById('sel-day');
+  selD.innerHTML=t.dayOptions.map(d=>`<option>${d}</option>`).join('');
+  document.getElementById('modal-shift').classList.add('open');
+}
+function closeModal(id){document.getElementById('modal-'+id).classList.remove('open');}
+
+/* ── LEAVE ── */
+let leaveFilter='all';
+
+function filterLeave(f, btn){
+  leaveFilter=f;
+  document.querySelectorAll('.lf-pill').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  renderLeaveTable();
+}
+
+function renderLeaveMetrics(){
+  const t=I[lang];
+  const reqs=t.leaveRequests||[];
+  const pending=reqs.filter(r=>r.status==='pending').length;
+  const approved=reqs.filter(r=>r.status==='approved').length;
+  const totalDays=reqs.filter(r=>r.status==='approved').reduce((s,r)=>s+r.days,0);
+  const el=document.getElementById('leave-metrics');
+  if(!el)return;
+  el.innerHTML=`
+    <div class="mc"><div class="mc-label" data-i18n="filterPending">${t.filterPending}</div><div class="mc-val warn">${pending}</div><div class="mc-sub warn">${t.leaveSubtitle?t.leavePending:''}</div></div>
+    <div class="mc"><div class="mc-label" data-i18n="filterApproved">${t.filterApproved}</div><div class="mc-val up">${approved}</div><div class="mc-sub up">${t.leaveApproved}</div></div>
+    <div class="mc"><div class="mc-label">Jours approuvés</div><div class="mc-val">${totalDays}</div><div class="mc-sub" style="color:var(--muted);">cette année</div></div>
+    <div class="mc"><div class="mc-label">${t.navTeam}</div><div class="mc-val">${getStoreEmps(activeStoreId).length}</div><div class="mc-sub" style="color:var(--muted);">${t.metricStaff}</div></div>`;
+  const pc=document.getElementById('pending-count');
+  if(pc)pc.textContent=pending;
+  document.getElementById('leave-badge').textContent=pending;
+}
+
+function renderLeaveTable(){
+  const t=I[lang];
+  const tbody=document.getElementById('leave-tbody');
+  if(!tbody)return;
+  const storeEmpIds=getStoreEmps(activeStoreId).map(e=>e.id);
+  let reqs=(t.leaveRequests||[]).filter(r=>storeEmpIds.includes(r.empId));
+  if(leaveFilter!=='all') reqs=reqs.filter(r=>r.status===leaveFilter);
+  const badgeCls={pending:'lb-pending',approved:'lb-approved',rejected:'lb-rejected'};
+  const badgeLbl={pending:t.leavePending,approved:t.leaveApproved,rejected:t.leaveRejected};
+  tbody.innerHTML=reqs.map(r=>{
+    const emp=employees.find(e=>e.id===r.empId);
+    if(!emp)return'';
+    return `<tr id="leave-row-${r.id}">
+      <td><div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:26px;height:26px;border-radius:50%;background:${emp.color}22;color:${emp.color};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;">${emp.name.split(' ').map(x=>x[0]).join('')}</div>
+        <div><div style="font-size:13px;font-weight:500;">${emp.name}</div><div style="font-size:11px;color:var(--muted);">${emp.role}</div></div>
+      </div></td>
+      <td><span style="font-size:12px;font-weight:500;">${r.type}</span></td>
+      <td style="font-size:12px;color:var(--muted);white-space:nowrap;">${r.from} → ${r.to}</td>
+      <td style="font-size:13px;font-weight:600;">${r.days}</td>
+      <td style="font-size:12px;color:var(--muted);font-style:${r.note?'normal':'italic'};max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.note||'—'}</td>
+      <td><span class="leave-badge ${badgeCls[r.status]}"><span class="leave-type-dot"></span>${badgeLbl[r.status]}</span></td>
+      <td>${r.status==='pending'?`
+        <span class="action-icon approve" title="${t.tooltipApprove}" onclick="actLeave(${r.id},'approved')">✓</span>
+        <span class="action-icon reject" title="${t.tooltipReject}" onclick="actLeave(${r.id},'rejected')">✕</span>
+      `:`<span style="font-size:12px;color:var(--muted);">—</span>`}</td>
+    </tr>`;
+  }).join('');
+  if(reqs.length===0) tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">—</td></tr>`;
+}
+
+function actLeave(id, newStatus){
+  const t=I[lang];
+  // update in all languages
+  Object.values(I).forEach(lng=>{
+    const req=(lng.leaveRequests||[]).find(r=>r.id===id);
+    if(req) req.status=newStatus;
+  });
+  renderLeaveTable();
+  renderLeaveMetrics();
+  showManagerToast(newStatus==='approved'?t.toastApproved:t.toastRejected);
+}
+
+function renderLeaveSummary(){
+  const t=I[lang];
+  const grid=document.getElementById('leave-summary-grid');
+  if(!grid)return;
+  const emps=getStoreEmps(activeStoreId).slice(0,6);
+  grid.innerHTML=emps.map(emp=>{
+    const bal=(t.empBalances||[]).find(b=>b.empId===emp.id)||{paid:18,rtt:3,sick:2};
+    const paidPct=Math.round(bal.paid/30*100);
+    const rttPct=Math.round(bal.rtt/10*100);
+    const sickPct=Math.round(bal.sick/10*100);
+    return `<div class="lsg-card">
+      <div class="lsg-emp">
+        <div style="width:28px;height:28px;border-radius:50%;background:${emp.color}22;color:${emp.color};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;">${emp.name.split(' ').map(x=>x[0]).join('')}</div>
+        <div><div class="lsg-name">${emp.name}</div><div class="lsg-role">${emp.role}</div></div>
+      </div>
+      <div class="lsg-bars">
+        <div class="lsg-bar-row">
+          <div class="lsg-bar-lbl">${t.lblPaid}</div>
+          <div class="lsg-bar-track"><div class="lsg-bar-fill" style="width:${paidPct}%;background:var(--accent);"></div></div>
+          <div class="lsg-bar-val">${bal.paid}j</div>
+        </div>
+        <div class="lsg-bar-row">
+          <div class="lsg-bar-lbl">${t.lblRTT}</div>
+          <div class="lsg-bar-track"><div class="lsg-bar-fill" style="width:${rttPct}%;background:var(--accent2);"></div></div>
+          <div class="lsg-bar-val">${bal.rtt}j</div>
+        </div>
+        <div class="lsg-bar-row">
+          <div class="lsg-bar-lbl">${t.lblSick}</div>
+          <div class="lsg-bar-track"><div class="lsg-bar-fill" style="width:${sickPct}%;background:var(--accent3);"></div></div>
+          <div class="lsg-bar-val">${bal.sick}j</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function exportLeave(){
+  showManagerToast('CSV exporté ✓');
+}
+
+let toastTimeout=null;
+function showManagerToast(msg){
+  let toast=document.getElementById('mgr-toast');
+  if(!toast){
+    toast=document.createElement('div');
+    toast.id='mgr-toast';
+    toast.style.cssText='position:fixed;bottom:24px;right:24px;background:#fff;color:#1a1a1c;padding:12px 18px;border-radius:12px;font-size:13px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.3);z-index:999;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;';
+    document.body.appendChild(toast);
+  }
+  toast.textContent=msg;
+  toast.style.opacity='1';toast.style.transform='translateY(0)';
+  if(toastTimeout)clearTimeout(toastTimeout);
+  toastTimeout=setTimeout(()=>{toast.style.opacity='0';toast.style.transform='translateY(8px)';},3000);
+}
+
+/* ── LANG ── */
+function toggleLang(e){e.stopPropagation();document.getElementById('lang-dd').classList.toggle('open');}
+document.addEventListener('click',()=>document.getElementById('lang-dd').classList.remove('open'));
+
+function setLang(l){
+  lang=l;const t=I[l];
+  document.documentElement.setAttribute('lang',l);
+  document.documentElement.setAttribute('dir',t.dir);
+  document.getElementById('cur-flag').textContent=t.flag;
+  document.getElementById('cur-lname').textContent=t.name;
+  document.querySelectorAll('.lang-opt').forEach(o=>o.classList.remove('active'));
+  document.querySelectorAll('.lchk').forEach(c=>c.style.display='none');
+  document.getElementById('opt-'+l).classList.add('active');
+  document.getElementById('lchk-'+l).style.display='inline';
+  document.getElementById('lang-dd').classList.remove('open');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(t[k]!==undefined)el.innerHTML=t[k];});
+  renderStoreSwitcher();renderStoresGrid();renderSchedule();renderGeoTable();renderTeam();renderActiveStoreLabel();
+  renderLeaveMetrics();renderLeaveTable();renderLeaveSummary();
+}
+
+/* ── INIT ── */
+setLang('fr');
+renderLeaveMetrics();renderLeaveTable();renderLeaveSummary();
+</script>
+</body>
+</html>
